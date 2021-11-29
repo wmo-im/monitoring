@@ -15,6 +15,8 @@ def read_bufr(f,keys):
       cnt = 0
       while 1:
         msgid = codes_bufr_new_from_file(fin)
+        if msgid is None:
+            break
         sn = codes_get(msgid, 'numberOfSubsets')
         codes_set(msgid, 'unpack', 1)
         compressed = codes_get(msgid, 'compressedData')
