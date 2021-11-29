@@ -1,0 +1,9 @@
+{
+  "monitor" : [
+    {
+      "directory": ".",
+      "format": "BUFR",
+      "keys": [["year","month","day"],["hour","minute"],["wigosIdentifierSeries","wigosIssuerOfIdentifier","wigosIssueNumber","wigosLocalIdentifierCharacter"],["blockNumber","stationNumber"],"latitude","longitude"]
+    }
+  ]
+}
