@@ -1,8 +1,18 @@
 {
   "monitor" : [
     {
-      "directory": ".",
+      "directory": "./bufr",
       "format": "BUFR",
+      "keys": [["year","month","day"],["hour","minute"],["wigosIdentifierSeries","wigosIssuerOfIdentifier","wigosIssueNumber","wigosLocalIdentifierCharacter"],["blockNumber","stationNumber"],"latitude","longitude"]
+    },
+    {
+      "directory": "./grib",
+      "format": "GRIB",
+      "keys": [["year","month","day"],["hour","minute"],["centre","generatingProcessIdentifier"],"shortName","latitudeOfFirstGridPoint","longitudeOfFirstGridPoint"]
+    },
+    {
+      "directory": "./tac",
+      "format": "TAC",
       "keys": [["year","month","day"],["hour","minute"],["wigosIdentifierSeries","wigosIssuerOfIdentifier","wigosIssueNumber","wigosLocalIdentifierCharacter"],["blockNumber","stationNumber"],"latitude","longitude"]
     }
   ]

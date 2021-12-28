@@ -22,7 +22,7 @@ def read_bufr(f,keys):
         compressed = codes_get(msgid, 'compressedData')
         num = 1
         while num<=sn:
-          line=f+';'+datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d;%H%M')
+          line="BUFR;"+f+';'+datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d;%H%M')
           for key1 in keys:
             if (type(key1)==str):
               key1=[key1]
@@ -30,7 +30,7 @@ def read_bufr(f,keys):
             for key2 in key1:
               try:
                 if compressed:
-                  val = codes_get(msgid, key)
+                  val = codes_get(msgid, key2)
                   val = val[num]
                 else:
                   val = codes_get(msgid, '/subsetNumber='+str(num)+'/'+key2)
@@ -49,6 +49,40 @@ def read_bufr(f,keys):
       print(f+' does not look like BUFR', file=sys.stderr)
     if (not msgid is None):
       codes_release(msgid)
+ 
+#Reads a GRIB file and prints the listed keys
+def read_grib(f,keys):
+  with open(f, 'rb') as fin:
+    msgid = None
+    try:
+      cnt = 0
+      while 1:
+        msgid = codes_grib_new_from_file(fin)
+        if msgid is None:
+            break
+        print(cnt)
+        line="GRIB;"+f+';'+datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d;%H%M')
+        for key1 in keys:
+          if (type(key1)==str):
+            key1=[key1]
+          line+=';'
+          for key2 in key1:
+            try:
+                val = codes_get(msgid, key2)
+            except KeyValueNotFoundError:
+                val=''
+                print('Key '+key2+' not found in '+f, file=sys.stderr)
+            if(val != ''):
+              val=str(val).zfill(2);
+              line+=val;
+        print(line)
+        if (not msgid is None):
+          codes_release(msgid)
+          msgid = None
+    except:
+      print(f+' does not look like GRIB', file=sys.stderr)
+      if (not msgid is None):
+        codes_release(msgid)
   
 
 #Reads a directory and directs reading of files depending on the datatype
@@ -65,11 +99,14 @@ def read_dir(directory,datatype,keys):
   if(datatype == 'BUFR'):
     func=read_bufr
   
+  if(datatype == 'GRIB'):
+    func=read_grib
+  
   if (func==None):
      print(datatype+' is not supported', file=sys.stderr)
   else:
     for f in fa:
-      func(f,keys)
+      func(directory+"/"+f,keys)
 
 
 def main(argv):
