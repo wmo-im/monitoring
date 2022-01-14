@@ -5,6 +5,7 @@ import os
 import sys
 import getopt
 import json
+import re
 from datetime import datetime
 
 #Reads a BUFR file and prints the listed keys
@@ -84,6 +85,38 @@ def read_grib(f,keys):
       if (not msgid is None):
         codes_release(msgid)
   
+#Reads a TAC Synop file and prints the listed keys
+def read_tac(f,keys):
+  stats = {}
+  with open('./vola_legacy_report.txt', 'rb') as fin:
+    inline=fin.readline()
+    inline=fin.readline()
+    while inline:
+      elems = inline.split(b'\t')
+      stat=elems[5].decode()
+      latm=elems[8].decode()
+    
+      deg,minutes,seconds,direction=re.split(" (\d+) (\d+)",latm)
+      lat=(float(deg) + float(minutes)/60 + float(seconds)/(60*60)) * (-1 if direction in ['W', 'S'] else 1)
+      lonm=elems[9].decode()
+      deg,minutes,seconds,direction=re.split(" (\d+) (\d+)",lonm)
+      lon=(float(deg) + float(minutes)/60 + float(seconds)/(60*60)) * (-1 if direction in ['W', 'S'] else 1)
+      
+      stats[stat]=str(lat)+';'+str(lon)
+      inline=fin.readline()
+  
+  with open(f, 'rb') as fin:
+    inline=fin.readline().decode()
+    while inline:
+      line="TAC;"+f+';'+datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d;%H%M')
+      s=inline.split(' ')
+      latlon=stats[s[0]]
+      time=s[len(s)-1]
+      time=time[1:5]
+      line=line+';;'+time+';;'+s[0]+';'+latlon
+      print(line)
+       
+      inline=fin.readline()
 
 #Reads a directory and directs reading of files depending on the datatype
 def read_dir(directory,datatype,keys):
@@ -101,6 +134,9 @@ def read_dir(directory,datatype,keys):
   
   if(datatype == 'GRIB'):
     func=read_grib
+  
+  if(datatype == 'TAC'):
+    func=read_tac
   
   if (func==None):
      print(datatype+' is not supported', file=sys.stderr)
