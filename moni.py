@@ -106,23 +106,93 @@ def read_tac(f,keys):
       inline=fin.readline()
   
   with open(f, 'rb') as fin:
-    inline=fin.readline().decode()
+    print("Reading "+f,file=sys.stderr)
+    inline=" "
+    try: 
+      while (inline and (not (("AAXX" in inline) or ("BBXX" in inline)))):
+        inline=fin.readline().decode()
+    except:
+      inline=''
     while inline:
       line="TAC;"+f+';'+datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d;%H%M')
+      inline=' '.join(inline.split())
       s=inline.split(' ')
-      latlon=stats[s[0]]
-      time=s[len(s)-1]
-      time=time[1:5]
-      line=line+';;'+time+';;'+s[0]+';'+latlon
-      print(line)
-       
-      inline=fin.readline()
+      nex=inline
+      while (nex and (not ("=" in inline))):
+        inline.rstrip()
+        try:
+          nex=fin.readline().decode()
+          inline=inline+" "+nex
+        except:
+          nex=None
+        inline=' '.join(inline.split())
+        s=inline.split(' ')
+      if ("AAXX" in s[0]):
+        time=s[1]
+        if (len(time) >= 7):
+          time=time[2:6]
+        else:
+          time=time[2:4]
+          time=time+"00" 
+        try:
+          latlon=stats[s[2]] 
+        except:
+          latlon=None
+          print("No station data or invalid synop: "+s[2]+" "+f,file=sys.stderr)
+        if (latlon != None): 
+          line=line+';;'+time+';;'+s[2]+';'+latlon
+          print(line)
+      if ("BBXX" in s[0]):
+        try:
+          time=s[2]
+          if (len(time) >= 7):
+            time=time[2:6]
+          else:
+            time=time[2:4]
+            time=time+"00" 
+          try:
+            lat=s[3]
+            lat=lat[2:]
+            lon=s[4]
+            d=lon[0:1]
+            lon=lon[1:]
+            lat=float(lat)
+            lat=lat/10
+            lon=float(lon)
+            lon=lon/10
+            if(d=="3"):
+              lat=-lat
+            if(d=="5"):
+              lat=-lat
+              lon=-lon
+            if(d=="7"):
+              lon=-lon
+            latlon=str(lat)+";"+str(lon)
+          except:
+            latlon=None
+            print("No station data or invalid synop: "+s[1]+f,file=sys.stderr)
+          if (latlon != None): 
+            line=line+';;'+time+';;'+s[1]+';'+latlon
+            print(line)
+        except:
+            print("No Time information or invalid synop: "+s[0]+" "+f,file=sys.stderr)
+      try: 
+        inline=fin.readline().decode()
+        if (inline and (not inline.isspace())):
+          if ("AAXX" in s[0]):
+            inline="AAXX "+s[1]+" "+inline
+          if ("BBXX" in s[0]):
+            inline="BBXX "+inline
+        else:
+         inline=''
+      except:
+        inline=''
 
 #Reads a directory and directs reading of files depending on the datatype
 def read_dir(directory,datatype,keys):
   fa = []
   if (not os.path.isdir(directory)):
-    print(directory+" not found", file=sys.stderr)
+    print(directory+" not found "+f, file=sys.stderr)
  
   for (dirpath, dirnames, filenames) in os.walk(directory):
     fa.extend(filenames)
@@ -139,7 +209,7 @@ def read_dir(directory,datatype,keys):
     func=read_tac
   
   if (func==None):
-     print(datatype+' is not supported', file=sys.stderr)
+     print(datatype+' is not supported '+f, file=sys.stderr)
   else:
     for f in fa:
       func(directory+"/"+f,keys)
