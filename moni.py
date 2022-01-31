@@ -8,6 +8,8 @@ import json
 import re
 from datetime import datetime
 
+missing=2147483647
+
 #Reads a BUFR file and prints the listed keys
 def read_bufr(f,keys):
   with open(f, 'rb') as fin:
@@ -31,13 +33,22 @@ def read_bufr(f,keys):
             for key2 in key1:
               try:
                 if compressed:
-                  val = codes_get(msgid, key2)
-                  val = val[num]
+                  val = codes_get_array(msgid, key2).tolist()
+                  #I know this is not 100% correct, but it works for now
+                  if(len(val)<sn):
+                    val=val[0]
+                  else:
+                    val = val[num-1]
                 else:
                   val = codes_get(msgid, '/subsetNumber='+str(num)+'/'+key2)
               except KeyValueNotFoundError:
                 val=''
                 print('Key '+key2+' not found in '+f, file=sys.stderr)
+              except:
+                val=''
+                print('Decoding error on '+key2+' in '+f, file=sys.stderr)
+              if((val!='') and (int(val)>=missing)):
+                val=''
               if(val != ''):
                 val=str(val).zfill(2);
               line+=val;
@@ -109,7 +120,7 @@ def read_tac(f,keys):
     print("Reading "+f,file=sys.stderr)
     inline=" "
     try: 
-      while (inline and (not (("AAXX" in inline) or ("BBXX" in inline)))):
+      while (inline and (not (("AAXX" in inline) or ("BBXX" in inline) or ("TTAA" in inline) or ("TTDD" in inline)))):
         inline=fin.readline().decode()
     except:
       inline=''
@@ -127,7 +138,7 @@ def read_tac(f,keys):
           nex=None
         inline=' '.join(inline.split())
         s=inline.split(' ')
-      if ("AAXX" in s[0]):
+      if (("AAXX" in s[0]) or ("TTDD" in s[0]) or ("TTAA" in s[0])):
         time=s[1]
         if (len(time) >= 7):
           time=time[2:6]
