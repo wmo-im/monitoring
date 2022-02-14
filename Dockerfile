@@ -2,12 +2,11 @@ FROM alpine
 
 COPY moni.py /home
 
-RUN apk --update add git less openssh python3 && \
+RUN apk --update add git less openssh python3 pip3 && \
     rm -rf /var/lib/apt/lists/* && \
     rm /var/cache/apk/*
 
-VOLUME /git
-WORKDIR /git
+RUN pip add eccodes-python
 
-ENTRYPOINT ["ls"]
-CMD ["--help"]
+ENTRYPOINT ["/home/moni.py"]
+CMD ["-f"]
