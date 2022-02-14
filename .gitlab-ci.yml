@@ -13,6 +13,7 @@ variables:
   RELEASE_IMAGE: $CI_REGISTRY_IMAGE:release
 
   #Scan Config
+  IGNORE_DEPRECATION_ERROR: "true"
   SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
   CLAIR_DB_IMAGE: "$SECURE_ANALYZERS_PREFIX/clair-vulnerabilities-db:latest"
   CS_ANALYZER_IMAGE: $SECURE_ANALYZERS_PREFIX/klar:3
