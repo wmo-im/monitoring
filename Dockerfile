@@ -8,6 +8,7 @@ RUN apt-get update && apt-get -y install git less gcc python3 python3-pip libecc
     echo "Done"
 
 RUN pip install eccodes-python
+RUN chmod gou+x /home/moni.py
 
 ENTRYPOINT ["/home/moni.py"]
-CMD ["-f"]
+CMD ["-f keys.json"]
