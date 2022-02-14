@@ -1,6 +1,6 @@
 FROM alpine
 
-PULL moni.py
+COPY moni.py /home
 
 RUN apk --update add git less openssh python3 && \
     rm -rf /var/lib/apt/lists/* && \
