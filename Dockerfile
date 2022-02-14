@@ -1,8 +1,8 @@
-FROM alpine
+FROM debian
 
 COPY moni.py /home
 
-RUN apk --update add git less openssh gcc python3 py3-pip libssp_nonshared && \
+RUN apk --update add git less openssh gcc python3 py3-pip && \
     rm -rf /var/lib/apt/lists/* && \
     rm /var/cache/apk/*
 
