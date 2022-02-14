@@ -2,7 +2,7 @@ FROM debian
 
 COPY moni.py /home
 
-RUN apk --update add git less openssh gcc python3 py3-pip && \
+RUN apt-get install git less openssh gcc python3 py3-pip && \
     rm -rf /var/lib/apt/lists/* && \
     rm /var/cache/apk/*
 
