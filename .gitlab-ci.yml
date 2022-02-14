@@ -1,0 +1,206 @@
+Skip to content
+GitLab
+Menu
+Search GitLab
+Help
+Wirt Kai-Thorsten
+M
+Moni
+Project information
+Repository
+Files
+Commits
+Branches
+Tags
+Contributors
+Graph
+Compare
+Security & Compliance
+Deployments
+Monitor
+Infrastructure
+Packages & Registries
+Analytics
+Settings
+Collapse sidebar
+Wirt Kai-Thorsten
+Moni
+Repository
+master
+moni
+gitlab-ci.yml
+Wirt Kai-Thorsten's avatar
+Upload New File
+Wirt Kai-Thorsten authored 5 minutes ago
+661729a3
+ gitlab-ci.yml  2.31 KB
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+variables:
+  
+  #ENV Config
+  HTTP_PROXY: http://ofsquid.dwd.de:8080
+  http_proxy: $HTTP_PROXY
+  HTTPS_PROXY: http://ofsquid.dwd.de:8080
+  https_proxy: $HTTPS_PROXY
+  NO_PROXY: "dwd.de,.dwd.de,*.dwd.de,localhost,127.0.0.1"
+  no_proxy: $NO_PROXY
+  #CI Config
+  TEST_IMAGE: $CI_REGISTRY_IMAGE:test
+  RELEASE_IMAGE: $CI_REGISTRY_IMAGE:release
+  #Scan Config
+  SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
+  CLAIR_DB_IMAGE: "$SECURE_ANALYZERS_PREFIX/clair-vulnerabilities-db:latest"
+  CS_ANALYZER_IMAGE: $SECURE_ANALYZERS_PREFIX/klar:3
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:test
+  GIT_STRATEGY: fetch
+stages:
+- build
+- scan
+- test
+- release
+build-image:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    # Kaniko config
+    - mkdir -p /kaniko/.docker
+    - |-
+       KANIKOCFG="\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}"
+       KANIKOCFG="${KANIKOCFG}, \"proxies\": { \"default\": { \"httpProxy\": \"${http_proxy}\", \"httpsProxy\": \"${https_proxy}\", \"noProxy\": \"${no_proxy}\"}}"
+       KANIKOCFG="{ ${KANIKOCFG} }"
+       echo "${KANIKOCFG}" > /kaniko/.docker/config.json
+    - cat /kaniko/.docker/config.json
+    # Build image
+    - >-
+      /kaniko/executor
+      --cache=true
+      --cache-ttl=24h
+      --context ${CI_PROJECT_DIR}
+      --dockerfile ${CI_PROJECT_DIR}/Dockerfile
+      --build-arg http_proxy=${http_proxy}
+      --build-arg https_proxy=${https_proxy}
+      --build-arg no_proxy=${no_proxy}
+      --destination $TEST_IMAGE
+scan-image:
+  stage: scan
+  needs: [build-image]
+  image: "$CS_ANALYZER_IMAGE"
+  allow_failure: true
+  services:
+    - name: $CLAIR_DB_IMAGE
+      alias: clair-vulnerabilities-db
+  script:
+    - /analyzer run
+  artifacts:
+    reports:
+      container_scanning: gl-container-scanning-report.json
+test-image:
+  stage: test
+  needs: [build-image]
+  image:
+    name: $TEST_IMAGE
+  script:
+    - git --version
+release-image:
+  stage: release
+  needs: [test-image,scan-image]
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [""]
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - crane cp $TEST_IMAGE $RELEASE_IMAGE
