@@ -4,7 +4,8 @@ COPY moni.py /home
 
 RUN apt-get update && apt-get -y install git less gcc python3 python3-pip && \
     rm -rf /var/lib/apt/lists/* && \
-    rm /var/cache/apk/*
+    rm /var/cache/apk/* && \
+    echo "Done"
 
 RUN pip install eccodes-python
 
