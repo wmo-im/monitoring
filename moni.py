@@ -7,6 +7,7 @@ import json
 from bufr import read_bufr
 from grib import read_grib
 from tac import read_tac
+from oscar import get_country
       
 #Reads a directory and directs reading of files depending on the datatype
 def read_dir(directory,datatype,keys):
@@ -69,9 +70,18 @@ def main(argv):
    
    json_string=json.dumps(result,indent=4)
    print(json_string) 
+
+   for el in result:
+     try:
+       wsi=el["wigosid"]
+     except:
+       wsi=None
+     try:
+       tsi=el["stationid"]
+     except:
+       tsi=None
+     print(str(wsi)+","+str(tsi)+"->"+str(get_country(wsi,tsi)))
    sys.exit()
-
-
 
 
 if __name__ == "__main__":

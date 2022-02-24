@@ -58,18 +58,26 @@ def get_time(f,msgid,compressed,num,sn):
 
 def get_wsi(f,msgid,compressed,num,sn):
   wsi=str(get_key(f,msgid,compressed,num,sn,"wigosIdentifierSeries"))
-  wsi+="-"+str(get_key(f,msgid,compressed,num,sn,"wigosIssuerOfIdentifier"))
-  wsi+="-"+str(get_key(f,msgid,compressed,num,sn,"wigosIssueNumber"))
-  wsi+="-"+str(get_key(f,msgid,compressed,num,sn,"wigosLocalIdentifierCharacter"))
+  if (wsi):
+    wsi+="-"+str(get_key(f,msgid,compressed,num,sn,"wigosIssuerOfIdentifier"))
+    wsi+="-"+str(get_key(f,msgid,compressed,num,sn,"wigosIssueNumber"))
+    wsi+="-"+str(get_key(f,msgid,compressed,num,sn,"wigosLocalIdentifierCharacter")).zfill(5)
+    wsi=wsi.upper()
+  else:
+    wsi=None
   return wsi
 
 def get_tsi(f,msgid,compressed,num,sn):
   tsi=get_key(f,msgid,compressed,num,sn,"blockNumber")
   if(tsi != ''):
     tsi=str(tsi).zfill(2);
+  else:
+    return None
   val=get_key(f,msgid,compressed,num,sn,"stationNumber")
   if(val != ''):
     val=str(val).zfill(3);
+  else:
+    return None
   tsi+=val;
   return tsi
 
