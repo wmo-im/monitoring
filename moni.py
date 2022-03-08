@@ -68,9 +68,6 @@ def main(argv):
    for el in data: 
      result+=read_dir(el['directory'],el['format'],el['keys'])
    
-   json_string=json.dumps(result,indent=4)
-   print(json_string) 
-
    for el in result:
      try:
        wsi=el["wigosid"]
@@ -80,7 +77,12 @@ def main(argv):
        tsi=el["stationid"]
      except:
        tsi=None
-     print(str(wsi)+","+str(tsi)+"->"+str(get_country(wsi,tsi)))
+     country=str(get_country(wsi,tsi))
+     el["country"]=country
+   
+   json_string=json.dumps(result,indent=4)
+   print(json_string) 
+
    sys.exit()
 
 
