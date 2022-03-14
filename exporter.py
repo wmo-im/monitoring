@@ -6,6 +6,7 @@ import requests
 import json
 import getopt
 import sys
+from countrycode import countrycode
 
 #        self.pending_requests.set(status_data["pending_requests"])
 #        self.total_uptime.set(status_data["total_uptime"])
@@ -61,11 +62,14 @@ def main(argv):
    totals_a={}
    totals_b={}
    percentage={}
+   totals_a_gauge=Gauge("base_count", "Number of Stations (expected)", ["location"])
+   totals_b_gauge=Gauge("data_count", "Number of Stations (is)", ["location"])
+   percentage_gauge=Gauge("percentage", "Percentage received", ["location"])
    for country in countries:
-        cname=country.replace(" ","_").replace(",","").replace("(","").replace(")","").replace("'","").replace("ô","")
-        totals_a[country]=Gauge(cname+"_base_count", "Number of Stations (expected)")
-        totals_b[country]=Gauge(cname+"_data_count", "Number of Stations (is)")
-        percentage[country]=Gauge(cname+"_percentage", "Percentage received")
+        cname=countrycode.countrycode(codes=[country], origin='country_name', target='iso2c')[0]
+        totals_a[country]=totals_a_gauge.labels(cname)
+        totals_b[country]=totals_b_gauge.labels(cname)
+        percentage[country]=percentage_gauge.labels(cname)
 
    while True:
         length = len(totals_a)
