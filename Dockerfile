@@ -16,9 +16,8 @@ RUN apt-get update && apt-get -y install git less gcc python3 python3-pip libecc
 RUN pip install eccodes-python prometheus_client requests countrycode
 RUN chmod gou+x /home/moni.py
 RUN chmod gou+x /home/exporter.py
-RUN find /var -type d -exec chmod gou+rwx {} \;
-RUN find /var -type f -exec chmod gou+rw {} \;
-RUN find /etc -type f -exec chmod gou+rw {} \;
+
+RUN grafana-cli plugins install grafana-worldmap-panel
 
 ENTRYPOINT ["/home/moni.py"]
 CMD ["-f keys.json"]
