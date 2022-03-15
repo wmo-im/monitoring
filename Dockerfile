@@ -16,6 +16,8 @@ RUN apt-get update && apt-get -y install git less gcc python3 python3-pip libecc
 RUN pip install eccodes-python prometheus_client requests countrycode
 RUN chmod gou+x /home/moni.py
 RUN chmod gou+x /home/exporter.py
+RUN cp -r /usr/local/share/grafana /home
+RUN cp -r /etc/prometheus /home
 
 ENTRYPOINT ["/home/moni.py"]
 CMD ["-f keys.json"]
