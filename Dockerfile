@@ -7,7 +7,7 @@ COPY grib.py /home
 COPY oscar.py /home
 COPY tac.py /home
 
-RUN apt-get install -y gnupg2 curl
+RUN apt-get install -y gnupg curl
 RUN curl https://packages.grafana.com/gpg.key | sudo apt-key add -k
 RUN apt-get update && apt-get -y install git less gcc python3 python3-pip libeccodes-dev libeccodes-tools prometheus grafana 
 
