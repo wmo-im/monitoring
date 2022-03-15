@@ -18,7 +18,7 @@ RUN chmod gou+x /home/moni.py
 RUN chmod gou+x /home/exporter.py
 RUN find /var -type d -exec chmod gou+rwx {} \;
 RUN find /var -type f -exec chmod gou+rw {} \;
-RUN find /etc -type f -exech chmod gou+rw {} \;
+RUN find /etc -type f -exec chmod gou+rw {} \;
 
 ENTRYPOINT ["/home/moni.py"]
 CMD ["-f keys.json"]
