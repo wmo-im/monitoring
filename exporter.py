@@ -137,7 +137,10 @@ def main(argv):
           lon[c].set(item["lon"])
 
         for country in countries:
-          percentage[country].set(totals_b[country]._value.get()/totals_a[country]._value.get()*100)
+          try:
+            percentage[country].set(totals_b[country]._value.get()/totals_a[country]._value.get()*100)
+          except:
+            percentage[country].set(100)
         time.sleep(60)
 
 if __name__ == "__main__":
