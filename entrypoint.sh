@@ -12,6 +12,7 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-p: Start Prometheus and Grafana"
   echo "-e [basefile] [datafile]: Start exporter"
   echo "-f: Generate metrics from configuration"
+  echo "-s: Stop services"
 fi
 
 if [ ! -d /monicfg ]; then
@@ -22,11 +23,13 @@ fi
 if [ $arg1 == "-e" ]; then
   /home/exporter/exporter.py -b $arg2 -d $arg3 &
   EX=$!
+  echo $EX > /monicfg/exporter.pid
 fi
 
 if [ $arg1 == "-i" ]; then
    cp -r /etc/prometheus /monicfg
    cp -r /usr/share/grafana/ /monicfg
+   cp -r /var/lib/grafana/plugins /monicfg/grafana/data
 fi
 
 if [ $arg1 == "-p" ]; then
@@ -35,10 +38,18 @@ if [ $arg1 == "-p" ]; then
    cd /monicfg/grafana || exit 1
    grafana-server &
    GR=$!
+   echo $PR > /monicfg/prometheus.pid
+   echo $GR > /monicfg/grafana.pid
 fi
 
 if [ $arg1 == "-f" ]; then
   /home/moni/moni.py -f $arg2
 fi
 
+if [ $arg1 == "-s" ]; then
+   for p in /monicfg/*.pid; do
+     echo "Stopping $p"
+     kill $(cat $p)
+     rm $p
+   done 
 exit 0
