@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 arg1=$1
 arg2=$2
 arg3=$3
 
+echo "Monitoring entrypoint. Got Parameters: $@"
 if [ -z $arg1 ] || [ $arg1 == "-h" ]; then 
   echo "Monitoring Container"
   echo "Possible commands:"
