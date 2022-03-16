@@ -36,10 +36,13 @@ fi
 if [ $arg1 == "-p" ]; then
    prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml &
    PR=$!
+   prometheus-node-exporter &
+   PN=$!
    cd /monicfg/grafana || exit 1
    grafana-server &
    GR=$!
    echo $PR > /monicfg/prometheus.pid
+   echo $PN > /monicfg/node.pid
    echo $GR > /monicfg/grafana.pid
 fi
 
