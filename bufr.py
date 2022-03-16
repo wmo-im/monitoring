@@ -105,8 +105,12 @@ def read_bufr(f,keys):
           entry["time"]=get_time(f,msgid,compressed,num,sn)
           entry["wigosid"]=get_wsi(f,msgid,compressed,num,sn)
           entry["stationid"]=get_tsi(f,msgid,compressed,num,sn)
-          entry["lat"]=get_key(f,msgid,compressed,num,sn,"latitude")
-          entry["lon"]=get_key(f,msgid,compressed,num,sn,"longitude")
+          try:
+            entry["lat"]=float(get_key(f,msgid,compressed,num,sn,"latitude"))
+            entry["lon"]=float(get_key(f,msgid,compressed,num,sn,"longitude"))
+          except:
+            entry["lat"]="-90"
+            entry["lon"]="0"
 
           num += 1
           result.append(entry)
