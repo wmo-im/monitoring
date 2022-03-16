@@ -33,10 +33,16 @@ def init():
    global stations_b
    global stations_p
 
-   with open(baseline, 'rb') as fin:
-     base = json.load(fin)
-   with open(data, 'rb') as fin:
-     mon = json.load(fin)
+   try:
+     with open(baseline, 'rb') as fin:
+       base = json.load(fin)
+   except:
+       base=[]
+   try:
+     with open(data, 'rb') as fin:
+       mon = json.load(fin)
+   except:
+       mon=[]
 
    for item in base:
         c=item["country"]
@@ -116,10 +122,16 @@ def main(argv):
           stations_b[station].set(0)
           stations_p[station].set(0)
        
-        with open(baseline, 'rb') as fin:
-          base = json.load(fin)
-        with open(data, 'rb') as fin:
-          mon = json.load(fin)
+        try:
+          with open(baseline, 'rb') as fin:
+            base = json.load(fin)
+        except:
+          base=[]
+        try:
+          with open(data, 'rb') as fin:
+            mon = json.load(fin)
+        except:
+          mon=[]
 
         for item in base:
           c=item["country"]

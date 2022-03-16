@@ -3,7 +3,7 @@ arg1=$1
 arg2=$2
 arg3=$3
 
-echo "Monitoring entrypoint. Got Parameters: $@"
+echo "Monitoring entrypoint. Got Parameters: $@" >&2
 if [ -z $arg1 ] || [ $arg1 == "-h" ]; then 
   echo "Monitoring Container"
   echo "Possible commands:"
@@ -13,6 +13,7 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-e [basefile] [datafile]: Start exporter"
   echo "-f: Generate metrics from configuration"
   echo "-s: Stop services"
+  exit 0
 fi
 
 if [ ! -d /monicfg ]; then
