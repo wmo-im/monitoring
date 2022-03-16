@@ -3,7 +3,7 @@ arg1=$1
 arg2=$2
 arg3=$3
 
-if [ $arg1 == "-h" ]; then 
+if [ -z $arg1 ] || [ $arg1 == "-h" ]; then 
   echo "Monitoring Container"
   echo "Possible commands:"
   echo "-h: This help text"
@@ -18,7 +18,7 @@ if [ ! -d /monicfg ]; then
   exit 1
 fi
 
-if [ $arg1 == "-e" ];
+if [ $arg1 == "-e" ]; then
   /home/exporter/exporter.py -b $arg2 - d $arg3 &
   EX=$!
 fi
