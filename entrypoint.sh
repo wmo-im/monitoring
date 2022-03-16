@@ -29,7 +29,8 @@ fi
 if [ $arg1 == "-i" ]; then
    cp -r /etc/prometheus /monicfg
    cp -r /usr/share/grafana/ /monicfg
-   cp -r /var/lib/grafana/plugins /monicfg/grafana/data
+   mkdir /monicfg/grafana/data
+   cp -r /var/lib/grafana/plugins/ /monicfg/grafana/data
 fi
 
 if [ $arg1 == "-p" ]; then
