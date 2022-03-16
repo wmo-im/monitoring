@@ -52,4 +52,5 @@ if [ $arg1 == "-s" ]; then
      kill $(cat $p)
      rm $p
    done 
+fi
 exit 0
