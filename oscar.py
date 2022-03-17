@@ -17,15 +17,15 @@ def get_country(wsi,tsi):
       country=countries[wsi]
       return country
     except:
-      contents = urllib.request.urlopen(URL+wsi).read()
-      contents=json.loads(contents.decode())
+      print("Searching country: "+URL+wsi,file=sys.stderr)
       try:
+        contents = urllib.request.urlopen(URL+wsi).read()
+        contents=json.loads(contents.decode())
         contents=contents["stationSearchResults"]
         contents=contents[0]
         country=contents["territory"]
       except:
         country=None
-      print("Searching country: "+URL+wsi,file=sys.stderr)
       countries[wsi]=country
     return country
 
