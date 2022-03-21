@@ -13,6 +13,8 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-e [basefile] [datafile]: Start exporter"
   echo "-f: Generate metrics from configuration"
   echo "-s: Stop services"
+  echo ""
+  echo "The configuration needs to be mounted at /monicfg"
   exit 0
 fi
 
@@ -22,9 +24,14 @@ if [ ! -d /monicfg ]; then
 fi
 
 if [ $arg1 == "-e" ]; then
+  if [ -z $arg2 ] || [ -z $arg3 ]; then 
+    echo "-e needs [basefile] [datafile] arguments"
+    exit 1
+  fi
   /home/exporter/exporter.py -b $arg2 -d $arg3 &
   EX=$!
   echo $EX > /monicfg/exporter.pid
+  echo ""
 fi
 
 if [ $arg1 == "-i" ]; then
@@ -45,6 +52,7 @@ if [ $arg1 == "-p" ]; then
    echo $PR > /monicfg/prometheus.pid
    echo $PN > /monicfg/node.pid
    echo $GR > /monicfg/grafana.pid
+   echo ""
 fi
 
 if [ $arg1 == "-f" ]; then
