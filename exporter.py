@@ -94,14 +94,6 @@ def main(argv):
    while True:
         print("Getting Metrics...",file=sys.stderr,end=' ')
         sys.stderr.flush()
-        for country in countries:
-          totals_a[country].set(0)
-          totals_b[country].set(0)
-          percentage[country].set(0)
-        for station in stationids:
-          stations_a[station].set(0)
-          stations_b[station].set(0)
-          stations_p[station].set(0)
        
         try:
           with open(baseline, 'rb') as fin:
@@ -114,6 +106,10 @@ def main(argv):
         except:
           mon=[]
 
+        for country in countries:
+          totals_a[country].set(0)
+        for station in stationids:
+          stations_a[station].set(0)
         for item in base:
           c=item["country"]
           if not c in countries:
@@ -148,6 +144,11 @@ def main(argv):
           stations_a[c].inc(1)
           lat[c].set(item["lat"])
           lon[c].set(item["lon"])
+          
+        for country in countries:
+          totals_b[country].set(0)
+        for station in stationids:
+          stations_b[station].set(0)
         for item in mon:
           c=item["country"]
           if not c in countries:
