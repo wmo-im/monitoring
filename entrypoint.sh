@@ -10,7 +10,8 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-h: This help text"
   echo "-i: Install Configuration"
   echo "-p: Start Prometheus and Grafana"
-  echo "-e [basefile] [datafile]: Start exporter"
+  echo "-pe [exporter]: Start Prometheus Exporters. Without exporter show available exporters"
+  echo "-e [basefile] [datafile]: Start data exporter"
   echo "-f: Generate metrics from configuration"
   echo "-s: Stop services"
   echo ""
@@ -44,15 +45,35 @@ fi
 if [ $arg1 == "-p" ]; then
    prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml &
    PR=$!
-   prometheus-node-exporter &
-   PN=$!
    cd /monicfg/grafana || exit 1
    grafana-server &
    GR=$!
    echo $PR > /monicfg/prometheus.pid
-   echo $PN > /monicfg/node.pid
    echo $GR > /monicfg/grafana.pid
    echo ""
+fi
+
+if [ $arg1 == "-pe" ]; then
+  if [ -z $arg2 ]; then 
+    echo "-pe requires an exporter (-pe [exporter])"
+    echo "Available exporters for -pe are"
+    echo "prometheus-alertmanager"
+    echo "prometheus-apache-exporter" 
+    echo "prometheus-blackbox-exporter" 
+    echo "prometheus-mqtt-exporter" 
+    echo "prometheus-nginx-exporter" 
+    echo "prometheus-node-exporter"
+    exit 0
+  fi
+  if [ -x $(which $arg2) ]; then
+    $arg2 &
+    EX=$!
+    echo $EX > /monicfg/$arg2.pid
+    echo ""
+  else
+    echo "$arg2 not found"
+    exit 1
+  fi
 fi
 
 if [ $arg1 == "-f" ]; then
