@@ -2,6 +2,8 @@
 arg1=$1
 arg2=$2
 arg3=$3
+shift
+shift
 
 echo "Monitoring entrypoint. Got Parameters: $@" >&2
 if [ -z $arg1 ] || [ $arg1 == "-h" ]; then 
@@ -10,7 +12,7 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-h: This help text"
   echo "-i: Install Configuration"
   echo "-p: Start Prometheus and Grafana"
-  echo "-pe [exporter]: Start Prometheus Exporters. Without exporter show available exporters"
+  echo "-pe [exporter] [params]: Start Prometheus Exporters. Without exporter show available exporters"
   echo "-e [basefile] [datafile]: Start data exporter"
   echo "-f: Generate metrics from configuration"
   echo "-s: Stop services"
@@ -65,8 +67,9 @@ if [ $arg1 == "-pe" ]; then
     echo "prometheus-node-exporter"
     exit 0
   fi
-  if [ -x $(which $arg2) ]; then
-    $arg2 &
+  if [ $(which $arg2) ]; then
+    cd /monicfg/prometheus || exit 1
+    $arg2 $@&
     EX=$!
     echo $EX > /monicfg/$arg2.pid
     echo ""
