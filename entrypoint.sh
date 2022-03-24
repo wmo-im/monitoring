@@ -2,6 +2,8 @@
 arg1=$1
 arg2=$2
 arg3=$3
+shift
+shift
 
 echo "Monitoring entrypoint. Got Parameters: $@" >&2
 if [ -z $arg1 ] || [ $arg1 == "-h" ]; then 
@@ -10,7 +12,8 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-h: This help text"
   echo "-i: Install Configuration"
   echo "-p: Start Prometheus and Grafana"
-  echo "-e [basefile] [datafile]: Start exporter"
+  echo "-pe [exporter] [params]: Start Prometheus Exporters. Without exporter show available exporters"
+  echo "-e [basefile] [datafile]: Start data exporter"
   echo "-f: Generate metrics from configuration"
   echo "-s: Stop services"
   echo ""
@@ -32,6 +35,7 @@ if [ $arg1 == "-e" ]; then
   EX=$!
   echo $EX > /monicfg/exporter.pid
   echo ""
+  exit 0
 fi
 
 if [ $arg1 == "-i" ]; then
@@ -39,24 +43,49 @@ if [ $arg1 == "-i" ]; then
    cp -r /usr/share/grafana/ /monicfg
    mkdir /monicfg/grafana/data
    cp -r /var/lib/grafana/plugins/ /monicfg/grafana/data
+   exit 0
 fi
 
 if [ $arg1 == "-p" ]; then
    prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml &
    PR=$!
-   prometheus-node-exporter &
-   PN=$!
    cd /monicfg/grafana || exit 1
    grafana-server &
    GR=$!
    echo $PR > /monicfg/prometheus.pid
-   echo $PN > /monicfg/node.pid
    echo $GR > /monicfg/grafana.pid
    echo ""
+   exit 0
+fi
+
+if [ $arg1 == "-pe" ]; then
+  if [ -z $arg2 ]; then 
+    echo "-pe requires an exporter (-pe [exporter])"
+    echo "Available exporters for -pe are"
+    echo "prometheus-alertmanager"
+    echo "prometheus-apache-exporter" 
+    echo "prometheus-blackbox-exporter" 
+    echo "prometheus-mqtt-exporter" 
+    echo "prometheus-nginx-exporter" 
+    echo "prometheus-node-exporter"
+    exit 0
+  fi
+  if [ $(which $arg2) ]; then
+    cd /monicfg/prometheus || exit 1
+    $arg2 $@&
+    EX=$!
+    echo $EX > /monicfg/$arg2.pid
+    echo ""
+    exit 0
+  else
+    echo "$arg2 not found"
+    exit 1
+  fi
 fi
 
 if [ $arg1 == "-f" ]; then
   /home/moni/moni.py -f $arg2
+  exit $?
 fi
 
 if [ $arg1 == "-s" ]; then
@@ -65,5 +94,8 @@ if [ $arg1 == "-s" ]; then
      kill $(cat $p)
      rm $p
    done 
+  exit 0
 fi
-exit 0
+echo "Invalid Parameter: $arg1"
+echo "Use -h for help"
+exit 1

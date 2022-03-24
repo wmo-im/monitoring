@@ -3,17 +3,17 @@
     {
       "directory": "./bufr",
       "format": "BUFR",
-      "keys": [["year","month","day"],["hour","minute"],["wigosIdentifierSeries","wigosIssuerOfIdentifier","wigosIssueNumber","wigosLocalIdentifierCharacter"],["blockNumber","stationNumber"],"latitude","longitude"]
+      "done": "./done"
     },
     {
       "directory": "./grib",
       "format": "GRIB",
-      "keys": [["year","month","day"],["hour","minute"],["centre","generatingProcessIdentifier"],"shortName","latitudeOfFirstGridPoint","longitudeOfFirstGridPoint"]
+      "done": "./done"
     },
     {
       "directory": "./tac",
       "format": "TAC",
-      "keys": [["year","month","day"],["hour","minute"],["wigosIdentifierSeries","wigosIssuerOfIdentifier","wigosIssueNumber","wigosLocalIdentifierCharacter"],["blockNumber","stationNumber"],"latitude","longitude"]
+      "done": "./done"
     }
   ]
 }
