@@ -1,0 +1,19 @@
+{
+  "monitor" : [
+    {
+      "directory": "./bufr",
+      "format": "BUFR",
+      "done": "./done"
+    },
+    {
+      "directory": "./grib",
+      "format": "GRIB",
+      "done": "./done"
+    },
+    {
+      "directory": "./tac",
+      "format": "TAC",
+      "done": "./done"
+    }
+  ]
+}

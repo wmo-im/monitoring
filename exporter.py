@@ -6,7 +6,6 @@ import requests
 import json
 import getopt
 import sys
-from countrycode import countrycode
 
 baseline = ''
 data = ''
@@ -97,12 +96,12 @@ def main(argv):
        
         try:
           with open(baseline, 'rb') as fin:
-            base = json.load(fin)
+            base = json.load(fin)["features"]
         except:
           base=[]
         try:
           with open(data, 'rb') as fin:
-            mon = json.load(fin)
+            mon = json.load(fin)["features"]
         except:
           mon=[]
 
@@ -111,15 +110,14 @@ def main(argv):
         for station in stationids:
           stations_a[station].set(0)
         for item in base:
-          c=item["country"]
+          c=item["properties"]["country"]
           if not c in countries:
              countries.append(c) 
-             cname=countrycode.countrycode(codes=[c], origin='country_name', target='iso2c')[0]
-             totals_a[c]=totals_a_gauge.labels(cname)
+             totals_a[c]=totals_a_gauge.labels(c)
              totals_a[c].set(0)
-             totals_b[c]=totals_b_gauge.labels(cname)
+             totals_b[c]=totals_b_gauge.labels(c)
              totals_b[c].set(0)
-             percentage[c]=percentage_gauge.labels(cname)
+             percentage[c]=percentage_gauge.labels(c)
              percentage[c].set(0)
           totals_a[c].inc(1)
           try:
@@ -133,32 +131,31 @@ def main(argv):
               c="None"
           if not c in stationids:
              stationids.append(c) 
-             stations_a[c]=stations_a_gauge.labels(c,item["lat"],item["lon"])
+             stations_a[c]=stations_a_gauge.labels(c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stations_a[c].set(0)
-             stations_b[c]=stations_b_gauge.labels(c,item["lat"],item["lon"])
+             stations_b[c]=stations_b_gauge.labels(c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stations_b[c].set(0)
-             stations_p[c]=stations_p_gauge.labels(c,item["lat"],item["lon"])
+             stations_p[c]=stations_p_gauge.labels(c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stations_p[c].set(0)
              lat[c]=lat_gauge.labels(c)
              lon[c]=lon_gauge.labels(c)
           stations_a[c].inc(1)
-          lat[c].set(item["lat"])
-          lon[c].set(item["lon"])
+          lat[c].set(item["geometry"]["coordinates"][1])
+          lon[c].set(item["geometry"]["coordinates"][0])
           
         for country in countries:
           totals_b[country].set(0)
         for station in stationids:
           stations_b[station].set(0)
         for item in mon:
-          c=item["country"]
+          c=item["properties"]["country"]
           if not c in countries:
              countries.append(c) 
-             cname=countrycode.countrycode(codes=[c], origin='country_name', target='iso2c')[0]
-             totals_a[c]=totals_a_gauge.labels(cname)
+             totals_a[c]=totals_a_gauge.labels(c)
              totals_a[c].set(0)
-             totals_b[c]=totals_b_gauge.labels(cname)
+             totals_b[c]=totals_b_gauge.labels(c)
              totals_b[c].set(0)
-             percentage[c]=percentage_gauge.labels(cname)
+             percentage[c]=percentage_gauge.labels(c)
              percentage[c].set(0)
           totals_b[c].inc(1)
           try:
@@ -172,17 +169,17 @@ def main(argv):
               c="None"
           if not c in stationids:
              stationids.append(c) 
-             stations_a[c]=stations_a_gauge.labels(c,item["lat"],item["lon"])
+             stations_a[c]=stations_a_gauge.labels(c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stations_a[c].set(0)
-             stations_b[c]=stations_b_gauge.labels(c,item["lat"],item["lon"])
+             stations_b[c]=stations_b_gauge.labels(c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stations_b[c].set(0)
-             stations_p[c]=stations_p_gauge.labels(c,item["lat"],item["lon"])
+             stations_p[c]=stations_p_gauge.labels(c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stations_p[c].set(0)
              lat[c]=lat_gauge.labels(c)
              lon[c]=lon_gauge.labels(c)
           stations_b[c].inc(1)
-          lat[c].set(item["lat"])
-          lon[c].set(item["lon"])
+          lat[c].set(item["geometry"]["coordinates"][1])
+          lon[c].set(item["geometry"]["coordinates"][0])
 
         for country in countries:
           try:

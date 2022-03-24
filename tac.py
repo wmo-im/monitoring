@@ -5,10 +5,13 @@ import sys
 import re
 from datetime import datetime
 
-#Reads a TAC Synop file and prints the listed keys
-def read_tac(f,keys):
+#Reads a TAC Synop file and prints the contents
+def read_tac(f):
   result=[]
+  geo={}
   entry={}
+  lat=""
+  lon=""
   stats = {}
   with open('./vola_legacy_report.txt', 'rb') as fin:
     inline=fin.readline()
@@ -36,6 +39,9 @@ def read_tac(f,keys):
     except:
       inline=''
     while inline:
+      geo["type"]="Feature"
+      geo["geometry"]={}
+      geo["geometry"]["type"]="Point"
       entry["type"]="TAC"
       entry["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
       entry["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
@@ -66,9 +72,11 @@ def read_tac(f,keys):
         if (latlon != None): 
           entry["time"]=time
           entry["stationid"]=s[2]
-          entry["lat"]=latlon[0]
-          entry["lon"]=latlon[1]
-          result.append(entry)
+          lat=latlon[0]
+          lon=latlon[1]
+          geo["properties"]=entry
+          geo["geometry"]["coordinates"]=[lon,lat]
+          result.append(geo)
       if ("BBXX" in s[0]):
         try:
           time=s[2]
@@ -101,9 +109,9 @@ def read_tac(f,keys):
           if (latlon != None): 
             entry["time"]=time
             entry["stationid"]=s[1]
-            entry["lat"]=str(lat)
-            entry["lon"]=str(lon)
-            result.append(entry)
+            geo["properties"]=entry
+            geo["geometry"]["coordinates"]=[lon,lat]
+            result.append(geo)
         except:
             print("No Time information or invalid synop: "+s[0]+" "+f,file=sys.stderr)
       try: 

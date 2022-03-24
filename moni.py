@@ -4,13 +4,15 @@ import os
 import sys
 import getopt
 import json
+import shutil
 from bufr import read_bufr
 from grib import read_grib
 from tac import read_tac
 from oscar import get_country
+from countrycode import countrycode
       
 #Reads a directory and directs reading of files depending on the datatype
-def read_dir(directory,datatype,keys):
+def read_dir(directory,datatype,done):
   result = []
   fa = []
   if (not os.path.isdir(directory)):
@@ -34,13 +36,16 @@ def read_dir(directory,datatype,keys):
      print(datatype+' is not supported '+f, file=sys.stderr)
   else:
     for f in fa:
-      result+=func(directory+"/"+f,keys)
+      result+=func(directory+"/"+f)
+      shutil.move(directory+"/"+f,done+"/"+f)
+   
   return result
 
 
 def main(argv):
    inputfile = ''
    result=[]
+   geo={}
    try:
       opts, args = getopt.getopt(argv,"hf:",["file="])
    except getopt.GetoptError:
@@ -66,21 +71,31 @@ def main(argv):
    data=data['monitor']
 
    for el in data: 
-     result+=read_dir(el['directory'],el['format'],el['keys'])
+     if (not os.path.isdir(el['done'])):
+       try:
+         os.mkdir(el['done'])
+       except:
+         print("Error at mkdir "+el['done'])
+         sys.exit(1)
+
+     result+=read_dir(el['directory'],el['format'],el['done'])
    
    for el in result:
      try:
-       wsi=el["wigosid"]
+       wsi=el["properties"]["wigosid"]
      except:
        wsi=None
      try:
-       tsi=el["stationid"]
+       tsi=el["properties"]["stationid"]
      except:
        tsi=None
      country=str(get_country(wsi,tsi))
-     el["country"]=country
-   
-   json_string=json.dumps(result,indent=4)
+     cname=countrycode.countrycode(codes=[country], origin='country_name', target='iso2c')[0]
+     el["properties"]["country"]=cname
+  
+   geo["type"]="FeatureCollection"
+   geo["features"]=result
+   json_string=json.dumps(geo,indent=4)
    print(json_string) 
 
    sys.exit()

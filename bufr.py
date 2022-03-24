@@ -82,13 +82,14 @@ def get_tsi(f,msgid,compressed,num,sn):
   return tsi
 
 #Reads and decodes a BUFR file 
-def read_bufr(f,keys):
+def read_bufr(f):
   result=[]
   with open(f, 'rb') as fin:
     msgid = None
     try:
       cnt = 0
       while 1:
+        geo={}
         entry={}
         msgid = codes_bufr_new_from_file(fin)
         if msgid is None:
@@ -98,6 +99,9 @@ def read_bufr(f,keys):
         compressed = codes_get(msgid, 'compressedData')
         num = 1
         while num<=sn:
+          geo["type"]="Feature"
+          geo["geometry"]={}
+          geo["geometry"]["type"]="Point"
           entry["type"]="BUFR"
           entry["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
           entry["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
@@ -106,14 +110,16 @@ def read_bufr(f,keys):
           entry["wigosid"]=get_wsi(f,msgid,compressed,num,sn)
           entry["stationid"]=get_tsi(f,msgid,compressed,num,sn)
           try:
-            entry["lat"]=float(get_key(f,msgid,compressed,num,sn,"latitude"))
-            entry["lon"]=float(get_key(f,msgid,compressed,num,sn,"longitude"))
+            lat=float(get_key(f,msgid,compressed,num,sn,"latitude"))
+            lon=float(get_key(f,msgid,compressed,num,sn,"longitude"))
           except:
-            entry["lat"]="-90"
-            entry["lon"]="0"
+            lat="-90"
+            lon="0"
 
+          geo["properties"]=entry
+          geo["geometry"]["coordinates"]=[lon,lat]
           num += 1
-          result.append(entry)
+          result.append(geo)
         if (not msgid is None):
           codes_release(msgid)
           msgid = None

@@ -35,6 +35,7 @@ if [ $arg1 == "-e" ]; then
   EX=$!
   echo $EX > /monicfg/exporter.pid
   echo ""
+  exit 0
 fi
 
 if [ $arg1 == "-i" ]; then
@@ -42,6 +43,7 @@ if [ $arg1 == "-i" ]; then
    cp -r /usr/share/grafana/ /monicfg
    mkdir /monicfg/grafana/data
    cp -r /var/lib/grafana/plugins/ /monicfg/grafana/data
+   exit 0
 fi
 
 if [ $arg1 == "-p" ]; then
@@ -53,6 +55,7 @@ if [ $arg1 == "-p" ]; then
    echo $PR > /monicfg/prometheus.pid
    echo $GR > /monicfg/grafana.pid
    echo ""
+   exit 0
 fi
 
 if [ $arg1 == "-pe" ]; then
@@ -73,6 +76,7 @@ if [ $arg1 == "-pe" ]; then
     EX=$!
     echo $EX > /monicfg/$arg2.pid
     echo ""
+    exit 0
   else
     echo "$arg2 not found"
     exit 1
@@ -81,6 +85,7 @@ fi
 
 if [ $arg1 == "-f" ]; then
   /home/moni/moni.py -f $arg2
+  exit $?
 fi
 
 if [ $arg1 == "-s" ]; then
@@ -89,5 +94,8 @@ if [ $arg1 == "-s" ]; then
      kill $(cat $p)
      rm $p
    done 
+  exit 0
 fi
-exit 0
+echo "Invalid Parameter: $arg1"
+echo "Use -h for help"
+exit 1

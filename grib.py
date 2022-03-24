@@ -38,9 +38,10 @@ def get_time(f,msgid):
     time+=str(minute).zfill(2);
   return time
 
-#Reads a GRIB file and prints the listed keys
-def read_grib(f,keys):
+#Reads a GRIB file and prints the contents
+def read_grib(f):
   result=[]
+  geo={}
   entry={}
   with open(f, 'rb') as fin:
     msgid = None
@@ -50,6 +51,9 @@ def read_grib(f,keys):
         msgid = codes_grib_new_from_file(fin)
         if msgid is None:
             break
+        geo["type"]="Feature"
+        geo["geometry"]={}
+        geo["geometry"]["type"]="Point"
         entry["type"]="GRIB"
         entry["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
         entry["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
@@ -57,10 +61,12 @@ def read_grib(f,keys):
         entry["time"]=get_time(f,msgid)
         entry["centre"]=get_key(f,msgid,"centre")
         entry["generatingProcessIdentifier"]=get_key(f,msgid,"generatingProcessIdentifier")
-        entry["lat"]=get_key(f,msgid,"latitudeOfFirstGridPoint")
-        entry["lon"]=get_key(f,msgid,"longitudeOfFirstGridPoint")
+        lat=float(get_key(f,msgid,"latitudeOfFirstGridPoint"))/1000
+        lon=float(get_key(f,msgid,"longitudeOfFirstGridPoint"))/1000
+        geo["properties"]=entry
+        geo["geometry"]["coordinates"]=[lon,lat]
         
-        result.append(entry)
+        result.append(geo)
         if (not msgid is None):
           codes_release(msgid)
           msgid = None
