@@ -9,6 +9,7 @@ COPY oscar.py /home/moni
 COPY tac.py /home/moni
 COPY exporter.py /home/exporter
 COPY entrypoint.sh /home
+COPY keys.json /home/moni
 
 RUN apt-get update && apt-get install -y gnupg apt-transport-https software-properties-common wget
 RUN wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -

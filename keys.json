@@ -15,5 +15,9 @@
       "format": "TAC",
       "done": "./done"
     }
-  ]
+  ],
+  "out" : {
+     "file": "./test.json",
+     "keep": 1
+  }
 }
