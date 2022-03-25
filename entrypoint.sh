@@ -1,11 +1,11 @@
 #!/bin/bash
+echo "Monitoring entrypoint. Got Parameters: $@" >&2
 arg1=$1
 arg2=$2
 arg3=$3
 shift
 shift
 
-echo "Monitoring entrypoint. Got Parameters: $@" >&2
 if [ -z $arg1 ] || [ $arg1 == "-h" ]; then 
   echo "Monitoring Container"
   echo "Possible commands:"
