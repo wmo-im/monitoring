@@ -86,7 +86,7 @@ if [ $arg1 == "-pe" ]; then
 fi
 
 if [ $arg1 == "-g" ]; then
-  /home/moni/moni.py -f /monicfg/keys.json &
+  /home/moni/moni.py -f /monicfg/moni/keys.json &
   MN=$!
   echo $MN > /monicfg/moni.pid
   echo ""
