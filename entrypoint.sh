@@ -13,8 +13,8 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-i: Install Configuration"
   echo "-p: Start Prometheus and Grafana"
   echo "-pe [exporter] [params]: Start Prometheus Exporters. Without exporter show available exporters"
-  echo "-e [basefile] [datafile]: Start data exporter"
-  echo "-f: Generate metrics from configuration"
+  echo "-e [basefile] [datafile]: Start OpenMetrics exporter"
+  echo "-g: Generate GeoJSON from configuration"
   echo "-s: Stop services"
   echo ""
   echo "The configuration needs to be mounted at /monicfg"
@@ -43,6 +43,8 @@ if [ $arg1 == "-i" ]; then
    cp -r /usr/share/grafana/ /monicfg
    mkdir /monicfg/grafana/data
    cp -r /var/lib/grafana/plugins/ /monicfg/grafana/data
+   mkdir /monicfg/moni
+   cp /home/moni/keys.json /monicfg/moni/
    exit 0
 fi
 
@@ -83,9 +85,12 @@ if [ $arg1 == "-pe" ]; then
   fi
 fi
 
-if [ $arg1 == "-f" ]; then
-  /home/moni/moni.py -f $arg2
-  exit $?
+if [ $arg1 == "-g" ]; then
+  /home/moni/moni.py -f /monicfg/keys.json &
+  MN=$!
+  echo $MN > /monicfg/moni.pid
+  echo ""
+  exit 0
 fi
 
 if [ $arg1 == "-s" ]; then

@@ -5,6 +5,8 @@ import sys
 import getopt
 import json
 import shutil
+import datetime
+import time
 from bufr import read_bufr
 from grib import read_grib
 from tac import read_tac
@@ -65,40 +67,72 @@ def main(argv):
      print(inputfile+' not found')
      sys.exit(2)
 
-   with open(inputfile, 'rb') as fin:
-     data = json.load(fin)
-   
-   data=data['monitor']
-
-   for el in data: 
-     if (not os.path.isdir(el['done'])):
-       try:
-         os.mkdir(el['done'])
-       except:
-         print("Error at mkdir "+el['done'])
-         sys.exit(1)
-
-     result+=read_dir(el['directory'],el['format'],el['done'])
-   
-   for el in result:
-     try:
-       wsi=el["properties"]["wigosid"]
-     except:
-       wsi=None
-     try:
-       tsi=el["properties"]["stationid"]
-     except:
-       tsi=None
-     country=str(get_country(wsi,tsi))
-     cname=countrycode.countrycode(codes=[country], origin='country_name', target='iso2c')[0]
-     el["properties"]["country"]=cname
+   try: 
+     with open(inputfile, 'rb') as fin:
+       data = json.load(fin)
   
-   geo["type"]="FeatureCollection"
-   geo["features"]=result
-   json_string=json.dumps(geo,indent=4)
-   print(json_string) 
-
-   sys.exit()
+     outputfile = data['out']['file']
+     keep = int(data['out']['keep'])
+     data=data['monitor']
+   except:
+     print("Fileformat Error in "+inputfile,file=sys.stderr)
+     sys.exit(2)
+  
+   while True: 
+     if (os.path.isfile(outputfile)):
+       try:
+         with open(outputfile, 'rb') as fin:
+           result = json.load(fin)['features']
+       except:
+         print("Fileformat Error in "+outputfile,file=sys.stderr)
+         sys.exit(2)
+ 
+     for el in data: 
+       if (not os.path.isdir(el['done'])):
+         try:
+           os.mkdir(el['done'])
+         except:
+           print("Error at mkdir "+el['done'],file=sys.stderr)
+           sys.exit(1)
+       print("Scanning "+el['directory'])
+       result+=read_dir(el['directory'],el['format'],el['done'])
+  
+     dtnow=datetime.datetime.utcnow()
+     now=dtnow.hour*100+dtnow.minute
+     geo["type"]="FeatureCollection"
+     geo["features"]=[]
+     for el in result:
+       try:
+         age=int(el["properties"]["received_time"])
+         age=now-age
+         if(age<0):
+           age+=2400
+         age/=100
+       except:
+         age=keep+1
+       if(age<=keep):
+         try:
+           wsi=el["properties"]["wigosid"]
+         except:
+           wsi=None
+         try:
+           tsi=el["properties"]["stationid"]
+         except:
+           tsi=None
+         country=str(get_country(wsi,tsi))
+         cname=countrycode.countrycode(codes=[country], origin='country_name', target='iso2c')[0]
+         el["properties"]["country"]=cname
+         geo["features"].append(el)
+  
+     try:
+       with open(outputfile, 'w', encoding='utf-8') as fout:
+         json.dump(geo, fout, ensure_ascii=False, indent=4)
+         print("",file=fout)
+     except:
+       print("Error in writing "+outputfile,file=sys.stderr)
+       sys.exit(2)
+     print("Done")
+     time.sleep(60)
 
 
 if __name__ == "__main__":
