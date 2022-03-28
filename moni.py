@@ -18,7 +18,7 @@ def read_dir(directory,datatype,done):
   result = []
   fa = []
   if (not os.path.isdir(directory)):
-    print(directory+" not found "+f, file=sys.stderr)
+    print(directory+" not found "+directory, file=sys.stderr)
  
   for (dirpath, dirnames, filenames) in os.walk(directory):
     fa.extend(filenames)

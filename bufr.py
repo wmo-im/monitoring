@@ -26,11 +26,11 @@ def get_key(f,msgid,compressed,num,sn,key):
     val=''
     print('Decoding error on '+key+' in '+f, file=sys.stderr)
   try:
-    val=int(val)
-    if (val>=missing):
+    val2=int(val)
+    if (val2>=missing):
       val=''
   except:
-    val=val
+    pass 
   return val
 
 def get_date(f,msgid,compressed,num,sn):
