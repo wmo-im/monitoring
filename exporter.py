@@ -121,12 +121,12 @@ def main(argv):
              percentage[c].set(0)
           totals_a[c].inc(1)
           try:
-            c=item["wigosid"]
+            c=item["properties"]["wigosid"]
           except:
             c="None"
           if ((not c) or (c=="None")):
             try:
-              c=item["stationid"]
+              c=item["properties"]["stationid"]
             except:
               c="None"
           if not c in stationids:
@@ -159,12 +159,12 @@ def main(argv):
              percentage[c].set(0)
           totals_b[c].inc(1)
           try:
-            c=item["wigosid"]
+            c=item["properties"]["wigosid"]
           except:
             c="None"
           if ((not c) or (c=="None")):
             try:
-              c=item["stationid"]
+              c=item["properties"]["stationid"]
             except:
               c="None"
           if not c in stationids:
