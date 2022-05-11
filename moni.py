@@ -120,7 +120,7 @@ def main(argv):
          except:
            tsi=None
          country=str(get_country(wsi,tsi))
-         cname=countrycode.countrycode(codes=[country], origin='country_name', target='iso2c')[0]
+         cname=countrycode.countrycode(codes=[country], origin='country_name', target='iso3c')[0]
          el["properties"]["country"]=cname
          geo["features"].append(el)
   
