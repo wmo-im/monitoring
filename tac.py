@@ -42,7 +42,7 @@ def read_tac(f):
       geo["type"]="Feature"
       geo["geometry"]={}
       geo["geometry"]["type"]="Point"
-      entry["type"]="TAC"
+      entry["data_format"]="TAC"
       entry["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
       entry["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
       inline=' '.join(inline.split())

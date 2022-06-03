@@ -19,5 +19,11 @@
   "out" : {
      "file": "./test.json",
      "keep": 1
+  },
+  "exporter" : {
+     "port": 9877,
+     "sensor": "Offenbach Met. Com. Center",
+     "baseline": "./test.json",
+     "data": "./test.json"
   }
 }

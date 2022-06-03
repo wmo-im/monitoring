@@ -102,7 +102,7 @@ def read_bufr(f):
           geo["type"]="Feature"
           geo["geometry"]={}
           geo["geometry"]["type"]="Point"
-          entry["type"]="BUFR"
+          entry["data_format"]="BUFR"
           entry["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
           entry["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
           entry["date"]=get_date(f,msgid,compressed,num,sn)

@@ -54,7 +54,7 @@ def read_grib(f):
         geo["type"]="Feature"
         geo["geometry"]={}
         geo["geometry"]["type"]="Point"
-        entry["type"]="GRIB"
+        entry["data_format"]="GRIB"
         entry["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
         entry["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
         entry["date"]=get_date(f,msgid)

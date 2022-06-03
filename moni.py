@@ -74,8 +74,9 @@ def main(argv):
      outputfile = data['out']['file']
      keep = int(data['out']['keep'])
      data=data['monitor']
-   except:
+   except Exception as e:
      print("Fileformat Error in "+inputfile,file=sys.stderr)
+     print(e)
      sys.exit(2)
   
    while True: 

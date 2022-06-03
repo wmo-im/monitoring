@@ -13,7 +13,7 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "-i: Install Configuration"
   echo "-p: Start Prometheus and Grafana"
   echo "-pe [exporter] [params]: Start Prometheus Exporters. Without exporter show available exporters"
-  echo "-e [basefile] [datafile]: Start OpenMetrics exporter"
+  echo "-e: Run exporter from configuration"
   echo "-g: Generate GeoJSON from configuration"
   echo "-s: Stop services"
   echo ""
@@ -27,11 +27,7 @@ if [ ! -d /monicfg ]; then
 fi
 
 if [ $arg1 == "-e" ]; then
-  if [ -z $arg2 ] || [ -z $arg3 ]; then 
-    echo "-e needs [basefile] [datafile] arguments"
-    exit 1
-  fi
-  /home/exporter/exporter.py -b $arg2 -d $arg3 &
+  /home/exporter/exporter.py -f /monicfg/moni/keys.json &
   EX=$!
   echo $EX > /monicfg/exporter.pid
   echo ""
