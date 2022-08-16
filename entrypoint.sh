@@ -5,6 +5,17 @@ arg2=$2
 arg3=$3
 shift
 shift
+MYPID=""
+
+trap stop SIGTERM SIGINT SIGQUIT SIGHUP
+
+stop(){
+  trap - SIGTERM SIGINT SIGQUIT SIGHUP
+  for p in $MYPID; do
+    kill $p;
+  done
+  exit 0
+}
 
 if [ -z $arg1 ] || [ $arg1 == "-h" ]; then 
   echo "Monitoring Container"
@@ -30,7 +41,10 @@ if [ $arg1 == "-e" ]; then
   /home/exporter/exporter.py -f /monicfg/moni/keys.json &
   EX=$!
   echo $EX > /monicfg/exporter.pid
+  MYPID="$MYPID $EX"
   echo ""
+  wait $(cat /monicfg/exporter.pid)
+  echo "Exporter stopped: $?"
   exit 0
 fi
 
@@ -52,7 +66,12 @@ if [ $arg1 == "-p" ]; then
    GR=$!
    echo $PR > /monicfg/prometheus.pid
    echo $GR > /monicfg/grafana.pid
+   MYPID="$MYPID $PR $GR"
    echo ""
+   wait $(cat /monicfg/grafana.pid)
+   echo "Grafana stopped: $?"
+   wait $(cat /monicfg/prometheus.pid)
+   echo "Prometheus stopped: $?"
    exit 0
 fi
 
@@ -73,7 +92,10 @@ if [ $arg1 == "-pe" ]; then
     $arg2 $@&
     EX=$!
     echo $EX > /monicfg/$arg2.pid
+    MYPID="$MYPID $EX"
     echo ""
+    wait $(cat /monicfg/$arg2.pid)
+    echo "$arg2 stopped: $?"
     exit 0
   else
     echo "$arg2 not found"
@@ -85,17 +107,25 @@ if [ $arg1 == "-g" ]; then
   /home/moni/moni.py -f /monicfg/moni/keys.json &
   MN=$!
   echo $MN > /monicfg/moni.pid
+  MYPID="$MYPID $MN"
   echo ""
+  wait $(cat /monicfg/moni.pid)
+  echo "moni stopped: $?"
   exit 0
 fi
 
 if [ $arg1 == "-s" ]; then
-   for p in /monicfg/*.pid; do
-     echo "Stopping $p"
-     kill $(cat $p)
-     rm $p
-   done 
-  exit 0
+   if [ -f /.dockerenv ]; then
+     echo "Please use docker stop to stop docker containers"
+     exit 1
+   else
+     for p in /monicfg/*.pid; do
+       echo "Stopping $p"
+       kill $(cat $p)
+       rm $p
+     done 
+     exit 0
+   fi
 fi
 echo "Invalid Parameter: $arg1"
 echo "Use -h for help"
