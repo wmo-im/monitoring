@@ -10,59 +10,61 @@ import sys
 sensor = ''
 baseline = ''
 data = ''
-totals_a_gauge=None
-totals_b_gauge=None
-percentage_gauge=None
-stations_a_gauge=None
-stations_b_gauge=None
-lat_gauge=None
-lon_gauge=None
-stations_p_gauge=None
 port=9877
 
-def init():
-   global totals_a_gauge
-   global totals_b_gauge
-   global percentage_gauge
-   global stations_a_gauge
-   global stations_b_gauge
-   global lat_gauge
-   global lon_gauge
-   global stations_p_gauge
+class monimetric:
+        base_gauge=None
+        data_gauge=None
+        percentage_Gauge=None
+        bases={}
+        datas={}
+        percents={}
+	
+        def __init__(self,name_a,name_b,name_p,text_a,text_b,text_p,keys):
+                self.base_gauge=Gauge(name_a,text_a,keys)
+                self.data_gauge=Gauge(name_b,text_b,keys)
+                self.percentage_gauge=Gauge(name_p,text_p,keys)
 
-   totals_a_gauge=Gauge("wmo_wis2_base_count_by_country", "Number of Stations (expected)", ["sensor","center"])
-   totals_b_gauge=Gauge("wmo_wis2_data_count_by_country", "Number of Stations (is)", ["sensor","center"])
-   percentage_gauge=Gauge("wmo_wis2_percentage_by_country", "Percentage received", ["sensor","center"])
-   stations_a_gauge=Gauge("wmo_wis2_base_count_by_station", "Number of Observations from Station (expected)", ["sensor","center","id","latitude","longitude"])
-   stations_b_gauge=Gauge("wmo_wis2_data_count_by_station", "Number of Observations from Station (is)", ["sensor","center","id","latitude","longitude"])
-   stations_p_gauge=Gauge("wmo_wis2_percentage_by_station", "Percentage received per Station", ["sensor","center","id","latitude","longitude"])
-   lat_gauge=Gauge("wmo_wis2_latitude_by_station", "Latitude of Station", ["sensor","center","id"])
-   lon_gauge=Gauge("wmo_wis2_longitude_by_station", "Longitude of Station", ["sensor","center","id"])
+        def set_base(self,id,value):
+                self.bases[id].set(value)
+        def set_data(self,id,value):
+                self.datas[id].set(value)
+        def set_percent(self,id,value):
+                self.percents[id].set(value)
+        def inc_base(self,id,value):
+                self.bases[id].inc(value)
+        def inc_data(self,id,value):
+                self.datas[id].inc(value)
+        def update(self,id):
+                try:
+                   self.percents[id].set(self.datas[id]._value.get()/self.bases[id]._value.get()*100)
+                except:
+                   self.percents[id].set(100)
+        def add(self,id,*args):
+                self.bases[id]=self.base_gauge.labels(*args)
+                self.bases[id].set(0)
+                self.datas[id]=self.data_gauge.labels(*args)
+                self.datas[id].set(0)
+                self.percents[id]=self.percentage_gauge.labels(*args)
+                self.percents[id].set(0)
+        def clear(self):
+                self.base_gauge.clear()
+                self.data_gauge.clear()
+                self.percentage_gauge.clear()
+
+def init():
+   global perStation
+   perStation=monimetric("wmo_wis2_base_count_by_station","wmo_wis2_data_count_by_station","wmo_wis2_percentage_by_station","Number of Observations from Station (expected)","Number of Observations from Station (is)","Percentage received per Station",["sensor","center","id","latitude","longitude"])
+   global perCountry
+   perCountry=monimetric("wmo_wis2_base_count_by_country","wmo_wis2_data_count_by_country","wmo_wis2_percentage_by_country","Number of Stations (expected)","Number of Stations (is)","Percentage received",["sensor","center"])
 
 def main(argv):
    global sensor
    global baseline
    global data
-   global totals_a_gauge
-   global totals_b_gauge
-   global percentage_gauge
-   global stations_a_gauge
-   global stations_b_gauge
-   global lat_gauge
-   global lon_gauge
-   global stations_p_gauge
+   global perCountry
+   global perStation
    
-   countries=[] 
-   stationids=[]
-   totals_a={}
-   totals_b={}
-   percentage={}
-   lat={}
-   lon={}
-   stations_a={}
-   stations_b={}
-   stations_p={}
-
    inputfile = ''
    cfg={}
    try:
@@ -92,6 +94,7 @@ def main(argv):
      sensor = cfg['exporter']['sensor']
      baseline = cfg['exporter']['baseline']
      data = cfg['exporter']['data']
+     keep = cfg['exporter']['keep']
    except Exception as e:
      print("Fileformat Error in "+inputfile,file=sys.stderr)
      print(e)
@@ -113,6 +116,11 @@ def main(argv):
    init()
 
    while True:
+        countries=[] 
+        stationids=[]
+        perStation.clear()
+        perCountry.clear()
+
         print("Getting Metrics...",file=sys.stderr,end=' ')
         sys.stderr.flush()
        
@@ -127,21 +135,12 @@ def main(argv):
         except:
           mon=[]
 
-        for country in countries:
-          totals_a[country].set(0)
-        for station in stationids:
-          stations_a[station].set(0)
         for item in base:
           c=item["properties"]["country"]
           if not c in countries:
+             perCountry.add(c,sensor,c)
              countries.append(c) 
-             totals_a[c]=totals_a_gauge.labels(sensor,c)
-             totals_a[c].set(0)
-             totals_b[c]=totals_b_gauge.labels(sensor,c)
-             totals_b[c].set(0)
-             percentage[c]=percentage_gauge.labels(sensor,c)
-             percentage[c].set(0)
-          totals_a[c].inc(1)
+          perCountry.inc_base(c,1)
           try:
             c=item["properties"]["wigosid"]
           except:
@@ -152,34 +151,20 @@ def main(argv):
             except:
               c="None"
           if not c in stationids:
+             perStation.add(c,sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stationids.append(c) 
-             stations_a[c]=stations_a_gauge.labels(sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stations_a[c].set(0)
-             stations_b[c]=stations_b_gauge.labels(sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stations_b[c].set(0)
-             stations_p[c]=stations_p_gauge.labels(sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stations_p[c].set(0)
-             lat[c]=lat_gauge.labels(sensor,item["properties"]["country"],c)
-             lon[c]=lon_gauge.labels(sensor,item["properties"]["country"],c)
-          stations_a[c].inc(1)
-          lat[c].set(item["geometry"]["coordinates"][1])
-          lon[c].set(item["geometry"]["coordinates"][0])
+          perStation.inc_base(c,1)
           
         for country in countries:
-          totals_b[country].set(0)
+          perCountry.set_data(country,0)
         for station in stationids:
-          stations_b[station].set(0)
+          perStation.set_data(station,0)
         for item in mon:
           c=item["properties"]["country"]
           if not c in countries:
+             perCountry.add(c,sensor,c)
              countries.append(c) 
-             totals_a[c]=totals_a_gauge.labels(sensor,c)
-             totals_a[c].set(0)
-             totals_b[c]=totals_b_gauge.labels(sensor,c)
-             totals_b[c].set(0)
-             percentage[c]=percentage_gauge.labels(sensor,c)
-             percentage[c].set(0)
-          totals_b[c].inc(1)
+          perCountry.inc_data(c,1)
           try:
             c=item["properties"]["wigosid"]
           except:
@@ -190,30 +175,15 @@ def main(argv):
             except:
               c="None"
           if not c in stationids:
+             perStation.add(c,sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
              stationids.append(c) 
-             stations_a[c]=stations_a_gauge.labels(sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stations_a[c].set(0)
-             stations_b[c]=stations_b_gauge.labels(sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stations_b[c].set(0)
-             stations_p[c]=stations_p_gauge.labels(sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stations_p[c].set(0)
-             lat[c]=lat_gauge.labels(sensor,item["properties"]["country"],c)
-             lon[c]=lon_gauge.labels(sensor,item["properties"]["country"],c)
-          stations_b[c].inc(1)
-          lat[c].set(item["geometry"]["coordinates"][1])
-          lon[c].set(item["geometry"]["coordinates"][0])
+          perStation.inc_data(c,1)
 
         for country in countries:
-          try:
-            percentage[country].set(totals_b[country]._value.get()/totals_a[country]._value.get()*100)
-          except:
-            percentage[country].set(100)
+          perCountry.update(country)
         
         for station in stationids:
-          try:
-            stations_p[station].set(stations_b[station]._value.get()/stations_a[station]._value.get()*100)
-          except:
-            stations_p[station].set(100)
+          perStation.update(station)
         print("done",file=sys.stderr)
         time.sleep(60)
 
