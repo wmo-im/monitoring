@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import time
-from prometheus_client import start_http_server, Gauge, Enum
+import prometheus_client as client
 import requests
 import json
 import getopt
@@ -21,9 +21,9 @@ class monimetric:
         percents={}
 	
         def __init__(self,name_a,name_b,name_p,text_a,text_b,text_p,keys):
-                self.base_gauge=Gauge(name_a,text_a,keys)
-                self.data_gauge=Gauge(name_b,text_b,keys)
-                self.percentage_gauge=Gauge(name_p,text_p,keys)
+                self.base_gauge=client.Gauge(name_a,text_a,keys)
+                self.data_gauge=client.Gauge(name_b,text_b,keys)
+                self.percentage_gauge=client.Gauge(name_p,text_p,keys)
 
         def set_base(self,id,value):
                 self.bases[id].set(value)
@@ -54,6 +54,9 @@ class monimetric:
 
 def init():
    global perStation
+   client.REGISTRY.unregister(client.PROCESS_COLLECTOR)
+   client.REGISTRY.unregister(client.PLATFORM_COLLECTOR)
+   client.REGISTRY.unregister(client.GC_COLLECTOR)
    perStation=monimetric("wmo_wis2_base_count_by_station","wmo_wis2_data_count_by_station","wmo_wis2_percentage_by_station","Number of Observations from Station (expected)","Number of Observations from Station (is)","Percentage received per Station",["sensor","center","id","latitude","longitude"])
    global perCountry
    perCountry=monimetric("wmo_wis2_base_count_by_country","wmo_wis2_data_count_by_country","wmo_wis2_percentage_by_country","Number of Stations (expected)","Number of Stations (is)","Percentage received",["sensor","center"])
@@ -101,7 +104,7 @@ def main(argv):
      sys.exit(2)
 
    try: 
-     start_http_server(port)
+     client.start_http_server(port)
    except:
       print("Can not listen on "+port)
       sys.exit(3)
