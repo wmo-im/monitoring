@@ -3,7 +3,6 @@
 
 #BUILD="docker build --tag moni.py:latest https://github.com/wmo-im/wismonitoring.git"
 BUILD="docker build --tag moni.py:latest moni"
-EXPORTER=9877
 DIR=/root/monitoring/moni
 
 arg1=$1
@@ -33,7 +32,21 @@ if [ $arg1 == "-b" ]; then
 fi
 
 if [ $arg1 == "-e" ]; then
-  docker run --rm --name moni_exporter -d -p $EXPORTER:$EXPORTER -v $DIR:/monicfg moni.py $arg1
+  if [ -f $DIR/moni/keys.json ]; then
+    EXPORTER=$(cat $DIR/moni/keys.json | jq -r -e '.exporter.port')
+    if [ $? -ne 0 ]; then
+      EXPORTER=""
+    fi
+  else 
+    echo "Exporter Configuration not found in $DIR/moni/keys.json"
+    exit 1
+  fi
+  if [ -n "$EXPORTER" ]; then
+    docker run --rm --name moni_exporter -d -p $EXPORTER:$EXPORTER -v $DIR:/monicfg moni.py $arg1
+  else
+    echo "Path exporter/port not found in $DIR/moni/keys.json"
+    exit 1
+  fi
 fi
 
 if [ $arg1 == "-i" ]; then
