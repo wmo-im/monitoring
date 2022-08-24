@@ -97,7 +97,6 @@ def main(argv):
      sensor = cfg['exporter']['sensor']
      baseline = cfg['exporter']['baseline']
      data = cfg['exporter']['data']
-     keep = cfg['exporter']['keep']
    except Exception as e:
      print("Fileformat Error in "+inputfile,file=sys.stderr)
      print(e)
