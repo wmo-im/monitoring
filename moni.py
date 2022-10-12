@@ -38,7 +38,7 @@ def read_dir(directory,datatype,done):
      print(datatype+' is not supported '+f, file=sys.stderr)
   else:
     for f in fa:
-      if not item.startswith("."):
+      if not f.startswith("."):
         try:
           result+=func(directory+"/"+f)
         except Exception as e:
