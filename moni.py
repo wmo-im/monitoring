@@ -38,8 +38,17 @@ def read_dir(directory,datatype,done):
      print(datatype+' is not supported '+f, file=sys.stderr)
   else:
     for f in fa:
-      result+=func(directory+"/"+f)
-      shutil.move(directory+"/"+f,done+"/"+f)
+      if not item.startswith("."):
+        try:
+          result+=func(directory+"/"+f)
+        except Exception as e:
+          print("Error reading "+f,file=sys.stderr)
+          print(e)
+        try:
+          shutil.move(directory+"/"+f,done+"/"+f)
+        except Exception as e:
+          print("Error reading "+f,file=sys.stderr)
+          print(e)
    
   return result
 
