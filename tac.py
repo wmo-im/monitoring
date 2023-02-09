@@ -13,7 +13,7 @@ def read_tac(f):
   lat=""
   lon=""
   stats = {}
-  with open('./vola_legacy_report.txt', 'rb') as fin:
+  with open(os.path.dirname(os.path.realpath(__file__))+'/vola_legacy_report.txt', 'rb') as fin:
     inline=fin.readline()
     inline=fin.readline()
     while inline:
@@ -34,7 +34,7 @@ def read_tac(f):
     print("Reading "+f,file=sys.stderr)
     inline=" "
     try: 
-      while (inline and (not (("AAXX" in inline) or ("BBXX" in inline) or ("TTAA" in inline) or ("TTDD" in inline)))):
+      while (inline and (not (("AAXX" in inline) or ("BBXX" in inline) or ("TT" in inline)))):
         inline=fin.readline().decode()
     except:
       inline=''
@@ -57,7 +57,7 @@ def read_tac(f):
           nex=None
         inline=' '.join(inline.split())
         s=inline.split(' ')
-      if (("AAXX" in s[0]) or ("TTDD" in s[0]) or ("TTAA" in s[0])):
+      if (("AAXX" in s[0]) or ("TT" in s[0])):
         time=s[1]
         if (len(time) >= 7):
           time=time[2:6]
@@ -68,7 +68,8 @@ def read_tac(f):
           latlon=stats[s[2]] 
         except:
           latlon=None
-          print("No station data or invalid synop: "+s[2]+" in "+f,file=sys.stderr)
+          if not ("NIL") in inline:
+            print("No station data or invalid synop: "+s[2]+" in "+f,file=sys.stderr)
         if (latlon != None): 
           entry["time"]=time
           entry["stationid"]=s[2]
@@ -105,7 +106,8 @@ def read_tac(f):
             latlon=str(lat)+";"+str(lon)
           except:
             latlon=None
-            print("No station data or invalid synop: "+s[1]+" in "+f,file=sys.stderr)
+            if not ("NIL") in inline:
+              print("No station data or invalid synop: "+s[1]+" in "+f,file=sys.stderr)
           if (latlon != None): 
             entry["time"]=time
             entry["stationid"]=s[1]
@@ -121,10 +123,8 @@ def read_tac(f):
             inline="AAXX "+s[1]+" "+inline
           if (("BBXX" in s[0]) and (not ("BBXX" in inline))):
             inline="BBXX "+inline
-          if (("TTAA" in s[0]) and (not ("TTAA" in inline))):
+          if (("TT" in s[0]) and (not ("TT" in inline))):
             inline="TTAA "+inline
-          if (("TTDD" in s[0]) and (not ("TTDD" in inline))):
-            inline="TTDD "+inline
         else:
          inline=''
       except:

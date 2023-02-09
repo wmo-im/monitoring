@@ -4,6 +4,7 @@
 #BUILD="docker build --tag moni.py:latest https://github.com/wmo-im/wismonitoring.git"
 BUILD="docker build --tag moni.py:latest moni"
 DIR=/root/monitoring/moni
+UID=$(id -u)
 
 arg1=$1
 arg2=$2
@@ -42,7 +43,7 @@ if [ $arg1 == "-e" ]; then
     exit 1
   fi
   if [ -n "$EXPORTER" ]; then
-    docker run --rm --name moni_exporter -d -p $EXPORTER:$EXPORTER -v $DIR:/monicfg moni.py $arg1
+    docker run -u $UID --rm --name moni_exporter -d -p $EXPORTER:$EXPORTER -v $DIR:/monicfg moni.py $arg1
   else
     echo "Path exporter/port not found in $DIR/moni/keys.json"
     exit 1
@@ -50,20 +51,20 @@ if [ $arg1 == "-e" ]; then
 fi
 
 if [ $arg1 == "-i" ]; then
-   docker run --rm -v $DIR:/monicfg moni.py $arg1
+   docker run -u $UID --rm -v $DIR:/monicfg moni.py $arg1
 fi
 
 if [ $arg1 == "-p" ]; then
-   docker run --rm --name moni_prometheus -d -p 9090:9090 -p 3000:3000 -v $DIR:/monicfg moni.py $arg1
+   docker run -u $UID --rm --name moni_prometheus -d -p 9090:9090 -p 3000:3000 -v $DIR:/monicfg moni.py $arg1
 fi
 
 if [ $arg1 == "-pe" ]; then
 #ToDo Correct Port for other exporters
-   docker run -d --rm --name moni_pe -p 9115:9115 -v $DIR:/monicfg moni.py $arg1 $arg2
+   docker run -u $UID -d --rm --name moni_pe -p 9115:9115 -v $DIR:/monicfg moni.py $arg1 $arg2
 fi
 
 if [ $arg1 == "-g" ]; then
-  docker run -d --rm --name moni_reader -v $DIR:/monicfg moni.py $arg1
+  docker run -u $UID -d --rm --name moni_reader -v $DIR:/monicfg moni.py $arg1
 fi
 
 if [ $arg1 == "-s" ]; then
