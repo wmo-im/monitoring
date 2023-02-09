@@ -1,6 +1,10 @@
 # WIS Monitoring
 
-This project generates GeoJSON and OpenMetrics from TAC, BUFR or GRIB input. Also contained are Prometheus and Grafana for the monitoring of the metrics. This guide assumes you built a container from the Dockerfile. The commands are for singularity but should work with Docker similarly.
+This project generates GeoJSON and OpenMetrics from TAC, BUFR or GRIB input. Also contained are Prometheus and Grafana for the monitoring of the metrics. 
+
+Naming of the metrics for WIS2 is documented here https://github.com/wmo-im/wis2-metric-hierarchy
+
+This guide assumes you built a container from the Dockerfile. The commands are for singularity but should work with Docker similarly.
 
 This shows the steps to setup two feeds from data -> GeoJSON. Then generate Openmetrics output. And finally start Prometheus and Grafana to monitor and visualize the results.
 
