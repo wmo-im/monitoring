@@ -46,7 +46,7 @@ All available switches can be displayed with **singularity run moni.sif -h**
 2. Populate Configuration directory  
    singularity run -B prometheus.cfg:/monicfg moni.sif -i  
    (docker-ctl.sh -i)
-3. Configure the exporter in prometheus.cfg/moni/keys.cfg. Port is the port on which the metrics are exported. sensor is the name of the center providing the metrics for example "sensor": "Offenbach Met. Com. Center". baseline and data are the files generated for data feed 1 resp. data feed 2. 
+3. Configure the exporter in prometheus.cfg/moni/keys.cfg. Port is the port on which the metrics are exported. centre-id is the name of the center providing the metrics for example "centre-id": "dwd-offenbach". baseline and data are the files generated for data feed 1 resp. data feed 2. 
 4. Start the exporter  
    singularity run -B prometheus.cfg:/monicfg moni.sif -e  
    (docker-ctl.sh -e)

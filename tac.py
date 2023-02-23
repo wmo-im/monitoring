@@ -5,11 +5,108 @@ import sys
 import re
 from datetime import datetime
 
-#Reads a TAC Synop file and prints the contents
-def read_tac(f):
-  result=[]
-  geo={}
+#Reads a Synop file and prints the contents
+def read_synop(f,stats,geo,s,inline):
   entry={}
+  lat=""
+  lon=""
+  time=s[1]
+  if (len(time) >= 7):
+    time=time[2:6]
+  else:
+    time=time[2:4]
+    time=time+"00" 
+  try:
+    latlon=stats[s[2]] 
+  except:
+    latlon=None
+    if not ("NIL") in s[2]:
+      print("No station data for: "+s[2]+" in "+f,file=sys.stderr)
+  entry["time"]=time
+  if (latlon != None): 
+    entry["stationid"]=s[2]
+    lat=latlon[0]
+    lon=latlon[1]
+    geo["geometry"]["coordinates"]=[lon,lat]
+  else:
+    geo["geometry"]["coordinates"]=None
+  geo["properties"]=entry
+
+#Reads a Ship file and prints the contents
+def read_ship(f,geo,s,inline):
+  entry={}
+  lat=""
+  lon=""
+  try:
+    time=s[2]
+    if (len(time) >= 7):
+      time=time[2:6]
+    else:
+      time=time[2:4]
+      time=time+"00" 
+    try:
+      lat=s[3]
+      lat=lat[2:]
+      lon=s[4]
+      d=lon[0:1]
+      lon=lon[1:]
+      lat=float(lat)
+      lat=lat/10
+      lon=float(lon)
+      lon=lon/10
+      if(d=="3"):
+        lat=-lat
+      if(d=="5"):
+        lat=-lat
+        lon=-lon
+      if(d=="7"):
+        lon=-lon
+      latlon=str(lat)+";"+str(lon)
+    except:
+      latlon=None
+      if not ("NIL") in s[1]:
+        print("No station data or invalid synop: "+s[1]+" in "+f,file=sys.stderr)
+    entry["time"]=time
+    if (latlon != None): 
+      entry["stationid"]=s[1]
+      lat=latlon[0]
+      lon=latlon[1]
+      geo["geometry"]["coordinates"]=[lon,lat]
+    else:
+      geo["geometry"]["coordinates"]=None
+    geo["properties"]=entry
+  except:
+    print("No Time information or invalid synop: "+s[0]+" "+f,file=sys.stderr)
+
+#Reads a temp file and prints the contents
+def read_temp(f,stats,geo,s,inline):
+  entry={}
+  lat=""
+  lon=""
+  time=s[1]
+  if (len(time) >= 7):
+    time=time[2:6]
+  else:
+    time=time[2:4]
+    time=time+"00" 
+  try:
+    latlon=stats[s[2]] 
+  except:
+    latlon=None
+    if not ("NIL") in s[2]:
+      print("No station data or invalid temp: "+s[2]+" in "+f,file=sys.stderr)
+  entry["time"]=time
+  if (latlon != None): 
+    entry["stationid"]=s[2]
+    lat=latlon[0]
+    lon=latlon[1]
+    geo["geometry"]["coordinates"]=[lon,lat]
+  else:
+    geo["geometry"]["coordinates"]=None
+  geo["properties"]=entry
+
+#Reads Legacy Volume A
+def read_vola():
   lat=""
   lon=""
   stats = {}
@@ -29,7 +126,15 @@ def read_tac(f):
       
       stats[stat]=[lat,lon]
       inline=fin.readline()
-  
+  return stats
+ 
+
+#Reads a TAC file and prints the contents
+def read_tac(f):
+  result=[]
+  lat=""
+  lon=""
+  stats = read_vola()
   with open(f, 'rb') as fin:
     print("Reading "+f,file=sys.stderr)
     inline=" "
@@ -39,12 +144,11 @@ def read_tac(f):
     except:
       inline=''
     while inline:
+      geo={}
       geo["type"]="Feature"
       geo["geometry"]={}
       geo["geometry"]["type"]="Point"
-      entry["data_format"]="TAC"
-      entry["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
-      entry["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
+    
       inline=' '.join(inline.split())
       s=inline.split(' ')
       nex=inline
@@ -57,65 +161,21 @@ def read_tac(f):
           nex=None
         inline=' '.join(inline.split())
         s=inline.split(' ')
-      if (("AAXX" in s[0]) or ("TT" in s[0])):
-        time=s[1]
-        if (len(time) >= 7):
-          time=time[2:6]
-        else:
-          time=time[2:4]
-          time=time+"00" 
-        try:
-          latlon=stats[s[2]] 
-        except:
-          latlon=None
-          if not ("NIL") in inline:
-            print("No station data or invalid synop: "+s[2]+" in "+f,file=sys.stderr)
-        if (latlon != None): 
-          entry["time"]=time
-          entry["stationid"]=s[2]
-          lat=latlon[0]
-          lon=latlon[1]
-          geo["properties"]=entry
-          geo["geometry"]["coordinates"]=[lon,lat]
-          result.append(geo)
+      if ("AAXX" in s[0]):
+        read_synop(f,stats,geo,s,inline)
       if ("BBXX" in s[0]):
-        try:
-          time=s[2]
-          if (len(time) >= 7):
-            time=time[2:6]
-          else:
-            time=time[2:4]
-            time=time+"00" 
-          try:
-            lat=s[3]
-            lat=lat[2:]
-            lon=s[4]
-            d=lon[0:1]
-            lon=lon[1:]
-            lat=float(lat)
-            lat=lat/10
-            lon=float(lon)
-            lon=lon/10
-            if(d=="3"):
-              lat=-lat
-            if(d=="5"):
-              lat=-lat
-              lon=-lon
-            if(d=="7"):
-              lon=-lon
-            latlon=str(lat)+";"+str(lon)
-          except:
-            latlon=None
-            if not ("NIL") in inline:
-              print("No station data or invalid synop: "+s[1]+" in "+f,file=sys.stderr)
-          if (latlon != None): 
-            entry["time"]=time
-            entry["stationid"]=s[1]
-            geo["properties"]=entry
-            geo["geometry"]["coordinates"]=[lon,lat]
-            result.append(geo)
-        except:
-            print("No Time information or invalid synop: "+s[0]+" "+f,file=sys.stderr)
+        read_ship(f,geo,s,inline)
+      if ("TT" in s[0]):
+        read_temp(f,stats,geo,s,inline)
+     
+      try: 
+        geo["properties"]["data_format"]="TAC"
+        geo["properties"]["received_date"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y%m%d')
+        geo["properties"]["received_time"]=datetime.fromtimestamp(os.path.getmtime(f)).strftime('%H%M')
+        result.append(geo)
+      except:
+        print("Decoding error in "+f,file=sys.stderr)
+      
       try: 
         inline=fin.readline().decode()
         if (inline and (not inline.isspace())):

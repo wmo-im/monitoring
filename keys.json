@@ -22,7 +22,7 @@
   },
   "exporter" : {
      "port": 9877,
-     "sensor": "Offenbach Met. Com. Center",
+     "centre-id": "dwd-offenbach",
      "baseline": "./test.json",
      "data": "./test.json"
   }

@@ -57,9 +57,9 @@ def init():
    client.REGISTRY.unregister(client.PROCESS_COLLECTOR)
    client.REGISTRY.unregister(client.PLATFORM_COLLECTOR)
    client.REGISTRY.unregister(client.GC_COLLECTOR)
-   perStation=monimetric("wmo_wis2_base_count_by_station","wmo_wis2_data_count_by_station","wmo_wis2_percentage_by_station","Number of Observations from Station (expected)","Number of Observations from Station (is)","Percentage received per Station",["sensor","center","id","latitude","longitude"])
+   perStation=monimetric("wmo_wis2_sensor_basecount_by_station","wmo_wis2_sensor_datacount_by_station","wmo_wis2_sensor_percentagebystation","Number of Observations from Station (expected)","Number of Observations from Station (is)","Percentage received per Station",["centre-id","country","id","latitude","longitude"])
    global perCountry
-   perCountry=monimetric("wmo_wis2_base_count_by_country","wmo_wis2_data_count_by_country","wmo_wis2_percentage_by_country","Number of Stations (expected)","Number of Stations (is)","Percentage received",["sensor","center"])
+   perCountry=monimetric("wmo_wis2_sensor_basecount_by_country","wmo_wis2_sensor_datacount_by_country","wmo_wis2_sensor_percentagebycountry","Number of Stations (expected)","Number of Stations (is)","Percentage received",["centre-id","country"])
 
 def main(argv):
    global sensor
@@ -94,7 +94,7 @@ def main(argv):
        cfg = json.load(fin)
   
      port = cfg['exporter']['port']
-     sensor = cfg['exporter']['sensor']
+     sensor = cfg['exporter']['centre-id']
      baseline = cfg['exporter']['baseline']
      data = cfg['exporter']['data']
    except Exception as e:
@@ -138,7 +138,10 @@ def main(argv):
           mon=[]
 
         for item in base:
-          c=item["properties"]["country"]
+          try:
+            c=item["properties"]["country"]
+          except:
+            c="None"
           if not c in countries:
              perCountry.add(c,sensor,c)
              countries.append(c) 
@@ -152,17 +155,21 @@ def main(argv):
               c=item["properties"]["stationid"]
             except:
               c="None"
-          if not c in stationids:
-             perStation.add(c,sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stationids.append(c) 
-          perStation.inc_base(c,1)
+          try:
+            if not c in stationids:
+               perStation.add(c,sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
+               stationids.append(c) 
+            perStation.inc_base(c,1)
           
         for country in countries:
           perCountry.set_data(country,0)
         for station in stationids:
           perStation.set_data(station,0)
         for item in mon:
-          c=item["properties"]["country"]
+          try:
+            c=item["properties"]["country"]
+          except:
+            c="None"
           if not c in countries:
              perCountry.add(c,sensor,c)
              countries.append(c) 
@@ -176,10 +183,11 @@ def main(argv):
               c=item["properties"]["stationid"]
             except:
               c="None"
-          if not c in stationids:
-             perStation.add(c,sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-             stationids.append(c) 
-          perStation.inc_data(c,1)
+          try:
+            if not c in stationids:
+               perStation.add(c,sensor,item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
+               stationids.append(c) 
+            perStation.inc_data(c,1)
 
         for country in countries:
           perCountry.update(country)
