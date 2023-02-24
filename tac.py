@@ -21,7 +21,8 @@ def read_synop(f,stats,geo,s,inline):
   except:
     latlon=None
     if not ("NIL") in s[2]:
-      print("No station data for: "+s[2]+" in "+f,file=sys.stderr)
+      if not ("NNNN") in s[2]:
+        print("No station data for: "+s[2]+" in "+f,file=sys.stderr)
   entry["time"]=time
   if (latlon != None): 
     entry["stationid"]=s[2]
@@ -65,7 +66,7 @@ def read_ship(f,geo,s,inline):
     except:
       latlon=None
       if not ("NIL") in s[1]:
-        print("No station data or invalid synop: "+s[1]+" in "+f,file=sys.stderr)
+        print("No coordinates for: "+s[1]+" in "+f,file=sys.stderr)
     entry["time"]=time
     if (latlon != None): 
       entry["stationid"]=s[1]
@@ -76,7 +77,8 @@ def read_ship(f,geo,s,inline):
       geo["geometry"]["coordinates"]=None
     geo["properties"]=entry
   except:
-    print("No Time information or invalid synop: "+s[0]+" "+f,file=sys.stderr)
+    if not ("NIL") in s[1]:
+      print("No Time information or invalid synop: "+s[0]+" "+f,file=sys.stderr)
 
 #Reads a temp file and prints the contents
 def read_temp(f,stats,geo,s,inline):
@@ -94,7 +96,7 @@ def read_temp(f,stats,geo,s,inline):
   except:
     latlon=None
     if not ("NIL") in s[2]:
-      print("No station data or invalid temp: "+s[2]+" in "+f,file=sys.stderr)
+      print("No station data for: "+s[2]+" in "+f,file=sys.stderr)
   entry["time"]=time
   if (latlon != None): 
     entry["stationid"]=s[2]
@@ -139,7 +141,7 @@ def read_tac(f):
     print("Reading "+f,file=sys.stderr)
     inline=" "
     try: 
-      while (inline and (not (("AAXX" in inline) or ("BBXX" in inline) or ("TT" in inline)))):
+      while (inline and (not ((inline.startswith("AAXX")) or (inline.startswith("BBXX")) or (inline.startswith("TT"))))):
         inline=fin.readline().decode()
     except:
       inline=''
@@ -190,4 +192,3 @@ def read_tac(f):
       except:
         inline=''
   return result
-

@@ -49,7 +49,7 @@ def read_dir(directory,datatype,done):
         except Exception as e:
           print("Error reading "+f,file=sys.stderr)
           print(e)
-   
+  
   return result
 
 

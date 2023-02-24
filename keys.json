@@ -22,7 +22,7 @@
   },
   "exporter" : {
      "port": 9877,
-     "centre-id": "dwd-offenbach",
+     "centre_id": "dwd-offenbach",
      "baseline": "./test.json",
      "data": "./test.json"
   }
