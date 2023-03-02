@@ -55,8 +55,6 @@ def read_dir(directory,datatype,done):
 
 def main(argv):
    inputfile = ''
-   result=[]
-   geo={}
    try:
       opts, args = getopt.getopt(argv,"hf:",["file="])
    except getopt.GetoptError:
@@ -89,6 +87,8 @@ def main(argv):
      sys.exit(2)
   
    while True: 
+     result=[]
+     geo={}
      if (os.path.isfile(outputfile)):
        try:
          with open(outputfile, 'rb') as fin:
