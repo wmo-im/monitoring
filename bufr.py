@@ -9,9 +9,13 @@ from datetime import datetime
 missing=2147483647
 
 def get_key(f,msgid,compressed,num,sn,key):
+  val=''
+  tmp=None
   try:
     if compressed:
-      val = codes_get_array(msgid, key).tolist()
+      tmp = codes_get_array(msgid, key)
+      val = tmp.tolist()
+      del tmp
       #I know this is not 100% correct, but it works for now
       if(len(val)<sn):
         val=val[0]
@@ -44,6 +48,7 @@ def get_date(f,msgid,compressed,num,sn):
     date+=str(month).zfill(2);
   if(day != ''):
     date+=str(day).zfill(2);
+ 
   return date
 
 def get_time(f,msgid,compressed,num,sn):
@@ -89,8 +94,6 @@ def read_bufr(f):
     try:
       cnt = 0
       while 1:
-        geo={}
-        entry={}
         msgid = codes_bufr_new_from_file(fin)
         if msgid is None:
             break
@@ -99,6 +102,8 @@ def read_bufr(f):
         compressed = codes_get(msgid, 'compressedData')
         num = 1
         while num<=sn:
+          geo={}
+          entry={}
           geo["type"]="Feature"
           geo["geometry"]={}
           geo["geometry"]["type"]="Point"
@@ -120,12 +125,18 @@ def read_bufr(f):
           geo["geometry"]["coordinates"]=[lon,lat]
           num += 1
           result.append(geo)
+          del geo
+          del entry
         if (not msgid is None):
           codes_release(msgid)
           msgid = None
     except:
       print(f+' does not look like BUFR', file=sys.stderr)
+      if (not msgid is None):
+        codes_release(msgid)
+        msgid = None
     if (not msgid is None):
       codes_release(msgid)
+      msgid = None
   return result 
 

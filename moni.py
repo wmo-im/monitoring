@@ -10,8 +10,7 @@ import time
 from bufr import read_bufr
 from grib import read_grib
 from tac import read_tac
-from oscar import get_country
-from countrycode import countrycode
+from oscar import get_country,get_cname
       
 #Reads a directory and directs reading of files depending on the datatype
 def read_dir(directory,datatype,done):
@@ -43,12 +42,12 @@ def read_dir(directory,datatype,done):
           result+=func(directory+"/"+f)
         except Exception as e:
           print("Error reading "+f,file=sys.stderr)
-          print(e)
+          print(e,file=sys.stderr)
         try:
           shutil.move(directory+"/"+f,done+"/"+f)
         except Exception as e:
           print("Error reading "+f,file=sys.stderr)
-          print(e)
+          print(e,file=sys.stderr)
   
   return result
 
@@ -83,7 +82,7 @@ def main(argv):
      data=data['monitor']
    except Exception as e:
      print("Fileformat Error in "+inputfile,file=sys.stderr)
-     print(e)
+     print(e,file=sys.stderr)
      sys.exit(2)
   
    while True: 
@@ -105,6 +104,7 @@ def main(argv):
            print("Error at mkdir "+el['done'],file=sys.stderr)
            sys.exit(1)
        print("Scanning "+el['directory'])
+
        result+=read_dir(el['directory'],el['format'],el['done'])
   
      dtnow=datetime.datetime.utcnow()
@@ -129,8 +129,7 @@ def main(argv):
            tsi=el["properties"]["stationid"]
          except:
            tsi=None
-         country=str(get_country(wsi,tsi))
-         cname=countrycode.countrycode(codes=[country], origin='country_name', target='iso3c')[0]
+         cname=str(get_cname(wsi,tsi))
          el["properties"]["country"]=cname
          geo["features"].append(el)
   
@@ -141,6 +140,8 @@ def main(argv):
      except:
        print("Error in writing "+outputfile,file=sys.stderr)
        sys.exit(2)
+     del result
+     del geo
      print("Done")
      time.sleep(60)
 

@@ -100,7 +100,7 @@ def main(argv):
    except Exception as e:
      print("Fileformat Error in "+inputfile,file=sys.stderr)
      print("Missing entry",file=sys.stderr)
-     print(e)
+     print(e,file=sys.stderr)
      sys.exit(2)
 
    try: 
