@@ -3,6 +3,7 @@ FROM debian
 RUN mkdir /home/moni
 RUN mkdir /home/exporter
 COPY moni.py /home/moni
+COPY reader.py /home/moni
 COPY bufr.py /home/moni
 COPY grib.py /home/moni
 COPY oscar.py /home/moni

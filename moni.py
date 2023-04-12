@@ -69,7 +69,7 @@ def main(argv):
          tsi=el["properties"]["stationid"]
        except:
          tsi=None
-       cname=str(get_cname(wsi,tsi))
+       cname=get_cname(wsi,tsi)
        el["properties"]["country"]=cname
        geo["features"].append(el)
   
