@@ -78,7 +78,7 @@ def get_country(wsi):
     cids[wsi]=str(ids)
     country=str(country)
     if (country=="Türkiye"):
-      country="Turkye"
+      country="Turkey"
     print("Got: "+country,file=sys.stderr)
     return country
 
