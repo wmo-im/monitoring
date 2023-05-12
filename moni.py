@@ -6,7 +6,7 @@ import getopt
 import json
 import subprocess
 import time
-from oscar import get_cname
+from oscar import *
 
 def main(argv):
    inputfile = ''
@@ -70,7 +70,9 @@ def main(argv):
        except:
          tsi=None
        cname=get_cname(wsi,tsi)
+       cid=get_cid(wsi,tsi)
        el["properties"]["country"]=cname
+       el["properties"]["centre_id"]=cid
        geo["features"].append(el)
   
      try:
