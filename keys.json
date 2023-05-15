@@ -20,6 +20,7 @@
      "file": "./test.json",
      "keep": 1
   },
+  "cache" : "./oscar.cache",
   "exporter" : {
      "port": 9877,
      "centre_id": "dwd-offenbach",
