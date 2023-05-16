@@ -116,7 +116,7 @@ class oscar:
 
   def write(self):
     while True:
-      time.sleep(30)
+      time.sleep(300)
       print("Caching oscar to "+str(self.cache))
       content={}
       content["cnames"]=self.cnames
