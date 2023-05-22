@@ -37,7 +37,6 @@ class oscar:
         wsi="0-20000-0-"+str(tsi)
     
     wsi=str(wsi)
-    print("Searching country for: "+wsi,file=sys.stderr)
     try:
       dtnow=datetime.datetime.utcnow()
       now=int(dtnow.timestamp())
@@ -45,7 +44,6 @@ class oscar:
       if (cname == "None"):
         if (now-self.times[wsi]>7*24*60*60):
           raise Exception("Reload entry")
-      print("Got: "+str(cname),file=sys.stderr)
       return cname
     except Exception as e:
       print(e)
@@ -57,7 +55,6 @@ class oscar:
         cname=cnameu
       cname=str(cname)
       self.cnames[wsi]=cname
-      print("Got: "+str(cname),file=sys.stderr)
       return cname
 
   def get_cid(self,wsi,tsi):
@@ -66,16 +63,13 @@ class oscar:
         wsi="0-20000-0-"+str(tsi)
     
     wsi=str(wsi)
-    print("Searching id for: "+wsi,file=sys.stderr)
     try:
       cid=self.cids[wsi]
-      print("Got: "+str(cid),file=sys.stderr)
       return cid
     except:
       country=self.get_country(wsi)
       try:
         self.cid=cids[wsi]
-        print("Got: "+str(cid),file=sys.stderr)
         return cid
       except:
         cid=None
@@ -117,7 +111,6 @@ class oscar:
   def write(self):
     while True:
       time.sleep(300)
-      print("Caching oscar to "+str(self.cache))
       content={}
       content["cnames"]=self.cnames
       content["cids"]=self.cids

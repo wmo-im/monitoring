@@ -138,7 +138,6 @@ def read_tac(f):
   lon=""
   stats = read_vola()
   with open(f, 'rb') as fin:
-    print("Reading "+f,file=sys.stderr)
     inline=" "
     try: 
       while (inline and (not ((inline.startswith("AAXX")) or (inline.startswith("BBXX")) or (inline.startswith("TT"))))):
