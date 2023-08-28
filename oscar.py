@@ -48,7 +48,7 @@ class oscar:
     except Exception as e:
       print(e)
       country=self.get_country(wsi)
-      cnameu=countrycode.countrycode(codes=[country], origin='country_name', target='iso3c')[0]
+      cnameu=countrycode([country], origin='country.name.en.regex', destination='iso3c')[0]
       try:
         cname=cnameu.lower()
       except:
