@@ -31,7 +31,7 @@ def read_dir(directory,datatype,done,excludes):
             except Exception as e:
               print("Error reading "+files,file=sys.stderr)
               print(e,file=sys.stderr)
-      fa.extend(filenames)
+    fa.extend(filenames)
     break
  
   func=None
