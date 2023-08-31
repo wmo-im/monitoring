@@ -10,16 +10,28 @@ import time
 from bufr import read_bufr
 from grib import read_grib
 from tac import read_tac
+from re import match
 
 #Reads a directory and directs reading of files depending on the datatype
-def read_dir(directory,datatype,done):
+def read_dir(directory,datatype,done,excludes):
   result = []
   fa = []
   if (not os.path.isdir(directory)):
     print(directory+" not found "+directory, file=sys.stderr)
  
   for (dirpath, dirnames, filenames) in os.walk(directory):
-    fa.extend(filenames)
+    for files in filenames:
+      if (excludes):
+        for rex in excludes:
+          if match(rex,files):
+            print("Skipping "+files)
+            try:
+              filenames.remove(files)
+              shutil.move(directory+"/"+files,done+"/"+files)
+            except Exception as e:
+              print("Error reading "+files,file=sys.stderr)
+              print(e,file=sys.stderr)
+      fa.extend(filenames)
     break
  
   func=None
@@ -102,8 +114,12 @@ def main(argv):
          print("Error at mkdir "+el['done'],file=sys.stderr)
          sys.exit(1)
      print("Scanning "+el['directory'])
-
-     result+=read_dir(el['directory'],el['format'],el['done'])
+     excludes=None
+     try:
+       excludes=el['exclude']
+     except:
+       pass
+     result+=read_dir(el['directory'],el['format'],el['done'],excludes)
   
    dtnow=datetime.datetime.utcnow()
    now=dtnow.hour*100+dtnow.minute

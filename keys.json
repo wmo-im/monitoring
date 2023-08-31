@@ -3,7 +3,8 @@
     {
       "directory": "./bufr",
       "format": "BUFR",
-      "done": "./done"
+      "done": "./done",
+      "exclude": ["^A_IE.*", "^A_IN.*", "^A_IR.*", "^A_IX.*","^A_ISXX.*"]
     },
     {
       "directory": "./grib",
