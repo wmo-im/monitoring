@@ -17,9 +17,12 @@ RUN wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
 RUN echo "deb https://packages.grafana.com/oss/deb stable main" | tee -a /etc/apt/sources.list.d/grafana.list
 
 RUN apt-get update && apt-get -y install git jq less gcc python3 python3-pip libeccodes-dev libeccodes-tools prometheus grafana 
-RUN apt-get -y install prometheus-alertmanager prometheus-apache-exporter prometheus-blackbox-exporter prometheus-mqtt-exporter prometheus-nginx-exporter prometheus-node-exporter python3-requests python3-countrycode python3-eccodes python3-prometheus-client
+RUN apt-get -y install prometheus-alertmanager prometheus-apache-exporter prometheus-blackbox-exporter prometheus-mqtt-exporter prometheus-nginx-exporter prometheus-node-exporter python3-requests python3-eccodes python3-prometheus-client
 
+RUN python3 -m venv /venv
+RUN /venv/bin/pip install countrycode
 #RUN pip install eccodes-python prometheus_client requests countrycode
+
 RUN chmod gou+x /home/moni/moni.py
 RUN chmod gou+x /home/exporter/exporter.py
 RUN chmod gou+x /home/entrypoint.sh
