@@ -20,8 +20,7 @@ RUN apt-get update && apt-get -y install git jq less gcc python3 python3-pip pyt
 RUN apt-get -y install prometheus-alertmanager prometheus-apache-exporter prometheus-blackbox-exporter prometheus-mqtt-exporter prometheus-nginx-exporter prometheus-node-exporter python3-requests python3-eccodes python3-prometheus-client
 
 RUN python3 -m venv /venv
-RUN /venv/bin/pip install countrycode
-#RUN pip install eccodes-python prometheus_client requests countrycode
+RUN /venv/bin/pip install countrycode eccodes
 
 RUN chmod gou+x /home/moni/moni.py
 RUN chmod gou+x /home/exporter/exporter.py

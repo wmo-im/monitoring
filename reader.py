@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/venv/bin/python3
 
 import os
 import sys
@@ -138,11 +138,11 @@ def main(argv):
        geo["features"].append(el)
   
    try:
-     with open(outputfile, 'w', encoding='utf-8') as fout:
+     with open(outputfile+".tmp", 'w', encoding='utf-8') as fout:
        json.dump(geo, fout, ensure_ascii=False, indent=4)
        print("",file=fout)
    except:
-     print("Error in writing "+outputfile,file=sys.stderr)
+     print("Error in writing "+outputfile+".tmp",file=sys.stderr)
      sys.exit(2)
    del result
    del geo

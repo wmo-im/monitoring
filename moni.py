@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/venv/bin/python3
 
 import os
 import sys
@@ -52,12 +52,12 @@ def main(argv):
          print("Error with reader.py",file=sys.stderr)
          os._exit(2)
 
-     if (os.path.isfile(outputfile)):
+     if (os.path.isfile(outputfile+".tmp")):
        try:
-         with open(outputfile, 'rb') as fin:
+         with open(outputfile+".tmp", 'rb') as fin:
            result = json.load(fin)['features']
        except:
-         print("Fileformat Error in "+outputfile,file=sys.stderr)
+         print("Fileformat Error in "+outputfile+".tmp",file=sys.stderr)
          os._exit(2)
  
      geo["type"]="FeatureCollection"
@@ -78,9 +78,11 @@ def main(argv):
        geo["features"].append(el)
   
      try:
-       with open(outputfile, 'w', encoding='utf-8') as fout:
+       with open(outputfile+".tmp", 'w', encoding='utf-8') as fout:
          json.dump(geo, fout, ensure_ascii=False, indent=4)
          print("",file=fout)
+       os.unlink(outputfile)
+       os.rename(outputfile+".tmp",outputfile)
      except:
        print("Error in writing "+outputfile,file=sys.stderr)
        os._exit(2)
