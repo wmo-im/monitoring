@@ -12,51 +12,103 @@ baseline = ''
 data = ''
 port=9877
 
+class monilabel:
+        labels=None
+        unusedcount=0
+        mybasegauge=None
+        mydatagauge=None
+        mypercentgauge=None
+        mybasegaugelabel=None
+        mydatagaugelabel=None
+        mypercentgaugelabel=None
+
+        def set_base(self,value):
+            self.mybasegaugelabel.set(value)
+        def set_data(self,value):
+            self.mydatagaugelabel.set(value)
+        def set_percent(self,value):
+            self.mypercentgaugelabel.set(value)
+        def inc_base(self,value):
+            self.mybasegaugelabel.inc(value)
+            self.unusedcount=0
+        def inc_data(self,value):
+            self.mydatagaugelabel.inc(value)
+            self.unusedcount=0
+        def get_base(self):
+            self.mybasegaugelabel._value.get()
+        def get_data(self,value):
+            self.mydatagaugelabel._value.get()
+                   
+        def __init__(self,base,data,percent,args):
+            self.labels=args
+            self.mybasegauge=base
+            self.mydatagauge=data
+            self.mypercentgauge=percent
+            self.mybasegaugelabel=self.mybasegauge.labels(*args)
+            self.mydatagaugelabel=self.mydatagauge.labels(*args)
+            self.mypercentgaugelabel=self.mypercentgauge.labels(*args)
+            self.set_base(0)
+            self.set_data(0)
+            self.set_percent(0)
+        
+        def deleted(self):
+            self.unusedcount+=1
+            if self.unusedcount>10:
+               self.mybasegauge.remove(*self.labels)
+               self.mydatagauge.remove(*self.labels)
+               self.mypercentgauge.remove(*self.labels)
+               return True
+            return False
+
 class monimetric:
         base_gauge=None
         data_gauge=None
         percentage_Gauge=None
-        bases={}
-        datas={}
-        percents={}
+        labels=None
 	
         def __init__(self,name_a,name_b,name_p,text_a,text_b,text_p,keys):
                 self.base_gauge=client.Gauge(name_a,text_a,keys)
                 self.data_gauge=client.Gauge(name_b,text_b,keys)
                 self.percentage_gauge=client.Gauge(name_p,text_p,keys)
+                self.labels={}
 
         def set_base(self,id,value):
-                self.bases[id].set(value)
+                self.labels[id].set_base(value)
         def set_data(self,id,value):
-                self.datas[id].set(value)
+                self.labels[id].set_data(value)
         def set_percent(self,id,value):
-                self.percents[id].set(value)
+                self.labels[id].set_percent(value)
         def inc_base(self,id,value):
-                self.bases[id].inc(value)
+                self.labels[id].inc_base(value)
         def inc_data(self,id,value):
-                self.datas[id].inc(value)
-        def update(self,id):
+                self.labels[id].inc_data(value)
+        def update(self):
+                for label in self.labels:
+                  try:
+                    self.labels[label].set_percent(self.labels[label].get_data()/self.labels[label].get_base()*100)
+                  except:
+                    self.labels[label].set_percent(100)
+        def add(self,id,b,d,*args):
                 try:
-                   self.percents[id].set(self.datas[id]._value.get()/self.bases[id]._value.get()*100)
+                  self.inc_base(id,b)
+                  self.inc_data(id,d)
                 except:
-                   self.percents[id].set(100)
-        def add(self,id,*args):
-                self.bases[id]=self.base_gauge.labels(*args)
-                self.bases[id].set(0)
-                self.datas[id]=self.data_gauge.labels(*args)
-                self.datas[id].set(0)
-                self.percents[id]=self.percentage_gauge.labels(*args)
-                self.percents[id].set(0)
+                  self.labels[id]=monilabel(self.base_gauge,self.data_gauge,self.percentage_gauge,args)
+                  self.inc_base(id,b)
+                  self.inc_data(id,d)
         def clear(self):
-                self.base_gauge.clear()
-                self.data_gauge.clear()
-                self.percentage_gauge.clear()
+            for label in self.labels.copy():
+               if self.labels[label].deleted():
+                  del self.labels[label]
+               else:
+                  self.labels[label].set_base(0)
+                  self.labels[label].set_data(0)
 
 def init():
-   global perStation
    client.REGISTRY.unregister(client.PROCESS_COLLECTOR)
    client.REGISTRY.unregister(client.PLATFORM_COLLECTOR)
    client.REGISTRY.unregister(client.GC_COLLECTOR)
+   global perStation
    perStation=monimetric("wmo_wis2_sensor_basecountbystation","wmo_wis2_sensor_datacountbystation","wmo_wis2_sensor_percentagebystation","Number of Observations from Station (expected)","Number of Observations from Station (is)","Percentage received per Station",["report_by","centre_id","country","id","latitude","longitude"])
    global perCountry
    perCountry=monimetric("wmo_wis2_sensor_basecountbycountry","wmo_wis2_sensor_datacountbycountry","wmo_wis2_sensor_percentagebycountry","Number of Stations (expected)","Number of Stations (is)","Percentage received",["report_by","centre_id","country"])
@@ -119,12 +171,9 @@ def main(argv):
    init()
 
    while True:
-        countries=[] 
-        stationids=[]
         perStation.clear()
         perCountry.clear()
 
-        print("Getting Metrics...",file=sys.stderr,end=' ')
         sys.stderr.flush()
        
         try:
@@ -143,13 +192,10 @@ def main(argv):
             c=item["properties"]["country"]
           except:
             c="None"
-          if not c in countries:
-             try:
-               perCountry.add(c,sensor,item["properties"]["centre_id"],c)
-             except:
-               perCountry.add(c,sensor,"None",c)
-             countries.append(c) 
-          perCountry.inc_base(c,1)
+          try:
+            perCountry.add(c,1,0,sensor,item["properties"]["centre_id"],c)
+          except:
+            perCountry.add(c,1,0,sensor,"None",c)
           try:
             c=item["properties"]["wigosid"]
           except:
@@ -160,32 +206,22 @@ def main(argv):
             except:
               c="None"
           try:
-            if not c in stationids:
                try:
-                 perStation.add(c,sensor,item["properties"]["centre_id"],item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
+                 perStation.add(c,1,0,sensor,item["properties"]["centre_id"],item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
                except:
-                 perStation.add(c,sensor,"None",item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-               stationids.append(c) 
-            perStation.inc_base(c,1)
+                 perStation.add(c,1,0,sensor,"None",item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
           except:
             pass
           
-        for country in countries:
-          perCountry.set_data(country,0)
-        for station in stationids:
-          perStation.set_data(station,0)
         for item in mon:
           try:
             c=item["properties"]["country"]
           except:
             c="None"
-          if not c in countries:
-             try:
-               perCountry.add(c,sensor,item["properties"]["centre_id"],c)
-             except:
-               perCountry.add(c,sensor,"None",c)
-             countries.append(c) 
-          perCountry.inc_data(c,1)
+          try:
+               perCountry.add(c,0,1,sensor,item["properties"]["centre_id"],c)
+          except:
+               perCountry.add(c,0,1,sensor,"None",c)
           try:
             c=item["properties"]["wigosid"]
           except:
@@ -196,22 +232,16 @@ def main(argv):
             except:
               c="None"
           try:
-            if not c in stationids:
                try:
-                 perStation.add(c,sensor,item["properties"]["centre_id"],item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
+                 perStation.add(c,0,1,sensor,item["properties"]["centre_id"],item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
                except:
-                 perStation.add(c,sensor,"None",item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
-               stationids.append(c) 
-            perStation.inc_data(c,1)
+                 perStation.add(c,0,1,sensor,"None",item["properties"]["country"],c,item["geometry"]["coordinates"][1],item["geometry"]["coordinates"][0])
           except:
             pass
 
-        for country in countries:
-          perCountry.update(country)
+        perCountry.update()
         
-        for station in stationids:
-          perStation.update(station)
-        print("done",file=sys.stderr)
+        perStation.update()
         time.sleep(60)
 
 if __name__ == "__main__":
