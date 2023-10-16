@@ -35,9 +35,9 @@ class monilabel:
             self.mydatagaugelabel.inc(value)
             self.unusedcount=0
         def get_base(self):
-            self.mybasegaugelabel._value.get()
-        def get_data(self,value):
-            self.mydatagaugelabel._value.get()
+            return self.mybasegaugelabel._value.get()
+        def get_data(self):
+            return self.mydatagaugelabel._value.get()
                    
         def __init__(self,base,data,percent,args):
             self.labels=args
