@@ -109,9 +109,9 @@ def init():
    client.REGISTRY.unregister(client.PLATFORM_COLLECTOR)
    client.REGISTRY.unregister(client.GC_COLLECTOR)
    global perStation
-   perStation=monimetric("wmo_wis2_sensor_basecountbystation","wmo_wis2_sensor_datacountbystation","wmo_wis2_sensor_percentagebystation","Number of Observations from Station (expected)","Number of Observations from Station (is)","Percentage received per Station",["report_by","centre_id","country","id","latitude","longitude"])
+   perStation=monimetric("wmo_wis2_sobs_basecountbystation_total","wmo_wis2_sobs_datacountbystation_total","wmo_wis2_sobs_percentagebystation_total","Number of Observations from Station (expected)","Number of Observations from Station (is)","Percentage received per Station",["report_by","centre_id","country","id","latitude","longitude"])
    global perCountry
-   perCountry=monimetric("wmo_wis2_sensor_basecountbycountry","wmo_wis2_sensor_datacountbycountry","wmo_wis2_sensor_percentagebycountry","Number of Stations (expected)","Number of Stations (is)","Percentage received",["report_by","centre_id","country"])
+   perCountry=monimetric("wmo_wis2_sobs_basecountbycountry_total","wmo_wis2_sobs_datacountbycountry_total","wmo_wis2_sobs_percentagebycountry_total","Number of Stations (expected)","Number of Stations (is)","Percentage received",["report_by","centre_id","country"])
 
 def main(argv):
    global sensor
