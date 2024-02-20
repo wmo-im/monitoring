@@ -15,25 +15,26 @@ from re import match
 #Reads a directory and directs reading of files depending on the datatype
 def read_dir(directory,datatype,done,excludes):
   result = []
-  fa = []
   if (not os.path.isdir(directory)):
     print(directory+" not found "+directory, file=sys.stderr)
  
-  for (dirpath, dirnames, filenames) in os.walk(directory):
-    for files in filenames:
-      if (excludes):
-        for rex in excludes:
-          if match(rex,files):
-            print("Skipping "+files)
-            try:
-              filenames.remove(files)
-              shutil.move(directory+"/"+files,done+"/"+files)
-            except Exception as e:
-              print("Error reading "+files,file=sys.stderr)
-              print(e,file=sys.stderr)
-    fa.extend(filenames)
-    break
+  filenames = os.listdir(directory)
+  before=len(filenames)
+  if (excludes):
+    for rex in excludes:
+      fc=filenames.copy()
+      for files in fc:
+        if match(rex,files):
+          print("Skipping "+files)
+          filenames.remove(files)
+          try:
+            shutil.move(directory+"/"+files,done+"/"+files)
+          except Exception as e:
+            print("Error reading "+files,file=sys.stderr)
+            print(e,file=sys.stderr)
  
+  after=len(filenames)
+  print("Checking "+str(after)+" of "+str(before)+" files in "+directory)
   func=None
   if(datatype == 'BUFR'):
     func=read_bufr
@@ -47,7 +48,7 @@ def read_dir(directory,datatype,done,excludes):
   if (func==None):
      print(datatype+' is not supported '+f, file=sys.stderr)
   else:
-    for f in fa:
+    for f in filenames:
       if not f.startswith("."):
         try:
           result+=func(directory+"/"+f)
