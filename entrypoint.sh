@@ -21,6 +21,7 @@ if [ -z $arg1 ] || [ $arg1 == "-h" ]; then
   echo "Monitoring Container"
   echo "Possible commands:"
   echo "-h: This help text"
+  echo "-a: Start Alertmanager Prometheus"
   echo "-i: Install Configuration"
   echo "-p: Start Prometheus and Grafana"
   echo "-pe [exporter] [params]: Start Prometheus Exporters. Without exporter show available exporters"
@@ -35,6 +36,17 @@ fi
 if [ ! -d /monicfg ]; then
   echo "Please mount a configuration directory to /monicfg" ]
   exit 1
+fi
+
+if [ $arg1 == "-a" ]; then
+  prometheus-alertmanager --config.file=/monicfg/prometheus/alertmanager.yml --web.config.file=/monicfg/prometheus/web.yml &
+  EX=$!
+  echo $EX > /monicfg/alertmanager.pid
+  MYPID="$MYPID $EX"
+  echo ""
+  wait $(cat /monicfg/alertmanager.pid)
+  echo "Alertmanager stopped: $?"
+  exit 0
 fi
 
 if [ $arg1 == "-e" ]; then
