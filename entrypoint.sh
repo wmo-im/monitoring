@@ -48,7 +48,7 @@ if [ $arg1 == "start" ]; then
     echo "Alertmanager stopped: $?"
     exit 0
   fi
-  if [ $arg1 == "moni_exporter" ]; then
+  if [ $arg2 == "moni_exporter" ]; then
     /home/exporter/exporter.py -f /monicfg/moni/keys.json &
     EX=$!
     echo $EX > /monicfg/exporter.pid
@@ -58,7 +58,7 @@ if [ $arg1 == "start" ]; then
     echo "Exporter stopped: $?"
     exit 0
   fi
-  if [ $arg1 == "moni_prometheus" ]; then
+  if [ $arg2 == "moni_prometheus" ]; then
     prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml &
     PR=$!
     echo $PR > /monicfg/prometheus.pid
@@ -66,7 +66,7 @@ if [ $arg1 == "start" ]; then
     echo "Prometheus stopped: $?"
     exit 0
   fi
-  if [ $arg1 == "moni_grafana" ]; then
+  if [ $arg2 == "moni_grafana" ]; then
     cd /usr/share/grafana || exit 1
     grafana-server &
     GR=$!
@@ -77,7 +77,7 @@ if [ $arg1 == "start" ]; then
     echo "Grafana stopped: $?"
     exit 0
   fi
-  if [ $arg1 == "moni_reader" ]; then
+  if [ $arg2 == "moni_reader" ]; then
     /home/moni/moni.py -f /monicfg/moni/keys.json &
     MN=$!
     echo $MN > /monicfg/moni.pid
