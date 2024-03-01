@@ -67,7 +67,7 @@ if [ $arg1 == "start" ]; then
     exit 0
   fi
   if [ $arg1 == "moni_grafana" ]; then
-    cd /monicfg/grafana || exit 1
+    cd /usr/share/grafana || exit 1
     grafana-server &
     GR=$!
     echo $GR > /monicfg/grafana.pid

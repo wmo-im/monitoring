@@ -63,7 +63,27 @@ if [ $arg1 == "start" ]; then
   fi
   for services in $(cat $arg2 | grep -v "#" | grep -v source= | grep -v tag= | grep -v config=); do
     echo "Starting $services"
-    #docker run -u $MYUID --rm --name moni_exporter -d -p $EXPORTER:$EXPORTER -v $DIR:/monicfg moni.py $arg1
+    name=$(echo $services | cut -d, -f1)
+    id=$(echo $services | cut -d, -f2)
+    port=$(echo $services | cut -d, -f3)
+    mounts=$(echo $services | cut -d, -f4)
+    if [ -z $name ] || [ -z $id ] || [ -z $port ]; then
+      echo "Invalid entry for $services"
+      exit 1
+    fi
+    MOUNT="-v $dir:/monicfg "
+    for m in $mounts; do
+      MOUNT="$MOUNT -v $m"
+    done
+    PORT=""
+    if [ $name == "moni_exporter" ]; then PORT="-p $port:$EXPORTER"; fi
+    if [ $name == "moni_reader" ]; then PORT=""; fi
+    if [ $name == "moni_prometheus" ]; then PORT="-p $port:9090"; fi
+    if [ $name == "moni_alertmanager" ]; then PORT="-p $port:9093"; fi
+    if [ $name == "moni_grafana" ]; then PORT="-p $port:3000"; fi
+    if [ $name == "moni_black" ]; then PORT="-p $port:9115"; fi
+    if [ $name == "moni_node" ]; then PORT="-p $port:9100"; fi
+    docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name &
   done
 fi
 

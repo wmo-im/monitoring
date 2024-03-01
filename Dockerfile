@@ -26,7 +26,7 @@ RUN chmod gou+x /home/moni/moni.py
 RUN chmod gou+x /home/exporter/exporter.py
 RUN chmod gou+x /home/entrypoint.sh
 RUN ln -s /home/moni/moni.py /bin/moni_reader
-RUN ln -s /home/moni/exporter.py /bin/moni_exporter
+RUN ln -s /home/exporter/exporter.py /bin/moni_exporter
 RUN ln -s $(which prometheus) /bin/moni_prometheus
 RUN ln -s $(which prometheus-alertmanager) /bin/moni_alertmanager
 RUN ln -s $(which grafana-server) /bin/moni_grafana
