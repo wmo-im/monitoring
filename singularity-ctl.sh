@@ -29,9 +29,10 @@ if [ -z $dir ] || [ -z $tag ]; then
 fi
 
 if [ $arg1 == "build" ]; then
+  export MALLOC_ARENA_MAX=2
   source=$(grep "source=" $arg2 | cut -d"=" -f2)
   echo "Building $tag from $source"
-  docker build --tag $tag $source
+  singularity build $tag $source
   exit $?
 fi
 
@@ -44,7 +45,7 @@ if [ $arg1 == "install" ]; then
       exit 1
     fi
   fi
-  docker run -u $MYUID --rm -v $dir:/monicfg $tag install
+  singularity run -B $dir:/monicfg $tag install
 fi
 
 if [ $arg1 == "start" ]; then
@@ -68,9 +69,7 @@ if [ $arg1 == "start" ]; then
 fi
 
 if [ $arg1 == "stop" ]; then
-  for i in $(docker ps | grep moni.py | cut -d' ' -f1); do
-    docker stop $i
-  done
+  singularity run -B $dir:/monicfg $tag stop
 fi
 
 exit 0
