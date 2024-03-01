@@ -25,13 +25,13 @@ RUN /venv/bin/pip install countrycode eccodes prometheus_client requests
 RUN chmod gou+x /home/moni/moni.py
 RUN chmod gou+x /home/exporter/exporter.py
 RUN chmod gou+x /home/entrypoint.sh
-RUN ln -s /bin/moni_reader /home/moni/moni.py
-RUN ln -s /bin/moni_exporter /home/moni/exporter.py
-RUN ln -s /bin/moni_prometheus $(which prometheus)
-RUN ln -s /bin/moni_alertmanager $(which prometheus-alertmanager)
-RUN ln -s /bin/moni_grafana $(which grafana-server)
-RUN ln -s /bin/moni_black $(which prometheus-blackbox-exporter)
-RUN ln -s /bin/moni_node $(which prometheus-node-exporter)
+RUN ln -s /home/moni/moni.py /bin/moni_reader
+RUN ln -s /home/moni/exporter.py /bin/moni_exporter
+RUN ln -s $(which prometheus) /bin/moni_prometheus
+RUN ln -s $(which prometheus-alertmanager) /bin/moni_alertmanager
+RUN ln -s $(which grafana-server) /bin/moni_grafana
+RUN ln -s $(which prometheus-blackbox-exporter) /bin/moni_black
+RUN ln -s $(which prometheus-node-exporter) /bin/moni_node
 
 RUN grafana-cli plugins install grafana-worldmap-panel
 RUN ln -s /monicfg/grafana/data /usr/share/grafana/data
