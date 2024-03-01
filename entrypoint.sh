@@ -123,6 +123,14 @@ if [ $arg1 == "stop" ]; then
      for p in /monicfg/*.pid; do
        echo "Stopping $p"
        kill $(cat $p)
+       sleep 1
+       kill -s 0 $(cat $p)
+       if [ $rc -eq 0 ]; then
+         sleep 1
+         kill $(cat $p)
+         sleep 2
+         kill -9 $(cat $p)
+       fi
        rm $p
      done 
      exit 0

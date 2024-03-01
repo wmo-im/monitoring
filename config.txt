@@ -1,0 +1,15 @@
+#Source directory from which to build the container
+source=.
+#Tag of the container for docker, resp. target filename for singularity
+tag=moni.py:latest
+#Configuration directory for the moni components
+config=./config
+#The following list contains
+#service to start,userid to run,port to listen,Mount points
+moni_exporter,1002,9877,
+moni_reader,1002,,
+moni_prometheus,1001,9090,
+moni_alertmanager,1001,9093,
+moni_grafana,1001,3001,
+moni_black,1001,9115,
+moni_node,1001,9100,
