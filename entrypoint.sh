@@ -125,7 +125,7 @@ if [ $arg1 == "stop" ]; then
        kill $(cat $p)
        sleep 1
        kill -s 0 $(cat $p)
-       if [ $rc -eq 0 ]; then
+       if [ $? -eq 0 ]; then
          sleep 1
          kill $(cat $p)
          sleep 2
