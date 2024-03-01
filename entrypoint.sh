@@ -69,7 +69,8 @@ if [ $arg1 == "start" ]; then
   if [ $arg2 == "moni_grafana" ]; then
     cd /usr/share/grafana || exit 1
     grafana-server &
-    GR=$!
+    sleep 1
+    GR=$(pgrep grafana)
     echo $GR > /monicfg/grafana.pid
     MYPID="$MYPID $PR $GR"
     echo ""
@@ -123,14 +124,6 @@ if [ $arg1 == "stop" ]; then
      for p in /monicfg/*.pid; do
        echo "Stopping $p"
        kill $(cat $p)
-       sleep 1
-       kill -s 0 $(cat $p)
-       if [ $? -eq 0 ]; then
-         sleep 1
-         kill $(cat $p)
-         sleep 2
-         kill -9 $(cat $p)
-       fi
        rm $p
      done 
      exit 0
