@@ -50,6 +50,7 @@ RUN uglifyjs /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app/app
 RUN cp /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app/index.html /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app/favicon.ico /usr/share/prometheus/alertmanager/ui
 RUN ln -s /usr/share/fonts-font-awesome /usr/share/prometheus/alertmanager/ui/lib/font-awesome
 RUN ln -s /usr/share/nodejs/bootstrap/dist /usr/share/prometheus/alertmanager/ui/lib/bootstrap
+RUN ln -s /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app/lib/elm-datepicker /usr/share/prometheus/alertmanager/ui/lib/elm-datepicker
 
 ENTRYPOINT ["/home/entrypoint.sh"]
 CMD ["-h"]
