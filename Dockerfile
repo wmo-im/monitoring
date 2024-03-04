@@ -41,7 +41,7 @@ RUN ln -s /monicfg/grafana/data /usr/share/grafana/data
 #Source in /usr/share/prometheus/alertmanager/generate-ui.sh
 RUN apt-get install -y libjs-bootstrap4 fonts-font-awesome curl uglifyjs golang-github-prometheus-alertmanager-dev
 RUN mkdir /home/elm
-RUN cd /home/elm && curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit && gunzip elm.gz && chmod u+x elm
+RUN cd /home/elm && curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && gunzip elm.gz && chmod u+x elm
 RUN cd /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app && /home/elm/elm make src/Main.elm --optimize --output ./app.js
 RUN mkdir -p /usr/share/prometheus/alertmanager/ui
 RUN mkdir -p /usr/share/prometheus/alertmanager/ui/lib
