@@ -36,6 +36,9 @@ RUN ln -s $(which prometheus-node-exporter) /bin/moni_node
 RUN grafana-cli plugins install grafana-worldmap-panel
 RUN ln -s /monicfg/grafana/data /usr/share/grafana/data
 
+RUN echo "#!/bin/bash" > /bin/apt
+RUN echo "apt-get install -y $@" >> /bin/apt
+RUN chmod gou+x /bin/apt
 RUN /bin/bash -c '/usr/share/prometheus/alertmanager/generate-ui.sh'
 
 ENTRYPOINT ["/home/entrypoint.sh"]
