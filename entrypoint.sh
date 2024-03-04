@@ -39,7 +39,8 @@ if [ $arg1 == "start" ]; then
     exit 1
   fi
   if [ $arg2 == "moni_alertmanager" ]; then
-    prometheus-alertmanager --config.file=/monicfg/prometheus/alertmanager.yml --web.config.file=/monicfg/prometheus/web.yml &
+    echo "prometheus-alertmanager --config.file=/monicfg/prometheus/alertmanager.yml --web.config.file=/monicfg/prometheus/web.yml $@"
+    prometheus-alertmanager --config.file=/monicfg/prometheus/alertmanager.yml --web.config.file=/monicfg/prometheus/web.yml $@ &
     EX=$!
     echo $EX > /monicfg/alertmanager.pid
     MYPID="$MYPID $EX"
@@ -49,6 +50,7 @@ if [ $arg1 == "start" ]; then
     exit 0
   fi
   if [ $arg2 == "moni_exporter" ]; then
+    echo "/home/exporter/exporter.py -f /monicfg/moni/keys.json"
     /home/exporter/exporter.py -f /monicfg/moni/keys.json &
     EX=$!
     echo $EX > /monicfg/exporter.pid
@@ -59,7 +61,8 @@ if [ $arg1 == "start" ]; then
     exit 0
   fi
   if [ $arg2 == "moni_prometheus" ]; then
-    prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml &
+    echo "prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml $@"
+    prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml $@ &
     PR=$!
     echo $PR > /monicfg/prometheus.pid
     wait $(cat /monicfg/prometheus.pid)
@@ -68,7 +71,8 @@ if [ $arg1 == "start" ]; then
   fi
   if [ $arg2 == "moni_grafana" ]; then
     cd /usr/share/grafana || exit 1
-    grafana-server &
+    echo "grafana-server $@"
+    grafana-server $@ &
     sleep 1
     GR=$(pgrep grafana)
     echo $GR > /monicfg/grafana.pid
@@ -79,6 +83,7 @@ if [ $arg1 == "start" ]; then
     exit 0
   fi
   if [ $arg2 == "moni_reader" ]; then
+    echo "/home/moni/moni.py -f /monicfg/moni/keys.json"
     /home/moni/moni.py -f /monicfg/moni/keys.json &
     MN=$!
     echo $MN > /monicfg/moni.pid
@@ -91,6 +96,7 @@ if [ $arg1 == "start" ]; then
 
   if [ $(which $arg2) ]; then
     cd /monicfg/prometheus || exit 1
+    echo "$arg2 $@"
     $arg2 $@&
     EX=$!
     echo $EX > /monicfg/$arg2.pid

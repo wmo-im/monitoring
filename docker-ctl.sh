@@ -67,6 +67,7 @@ if [ $arg1 == "start" ]; then
     id=$(echo $services | cut -d, -f2)
     port=$(echo $services | cut -d, -f3)
     mounts=$(echo $services | cut -d, -f4)
+    args=$(echo $services | cut -d, -f5)
     if [ -z $name ] || [ -z $id ]; then
       echo "Invalid entry for $services"
       exit 1
@@ -84,7 +85,8 @@ if [ $arg1 == "start" ]; then
     if [ $name == "moni_black" ]; then PORT="-p $port:9115"; fi
     if [ $name == "moni_node" ]; then PORT="-p $port:9100"; fi
     if [ -z $port ]; then PORT=""; fi
-    docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name &
+    echo "docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name $args"
+    docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name $args &
   done
 fi
 
