@@ -110,7 +110,7 @@ if [ $arg1 == "install" ]; then
    cp -r /etc/prometheus /monicfg
    mkdir /monicfg/grafana
    mkdir /monicfg/grafana/data
-   cp -r /var/lib/grafana/plugins/ /monicfg/grafana/data
+   ln -s /var/lib/grafana/plugins/ /monicfg/grafana/data/plugins
    mkdir /monicfg/moni
    cp /home/moni/keys.json /monicfg/moni/
    exit 0
