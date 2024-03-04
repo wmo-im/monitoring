@@ -49,7 +49,7 @@ RUN mkdir -p /usr/share/prometheus/alertmanager/ui/lib
 RUN uglifyjs /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app/app.js --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' --mangle --output /usr/share/prometheus/alertmanager/ui/script.js
 RUN cp /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app/index.html /usr/share/gocode/src/github.com/prometheus/alertmanager/ui/app/favicon.ico /usr/share/prometheus/alertmanager/ui
 RUN ln -s /usr/share/fonts-font-awesome /usr/share/prometheus/alertmanager/ui/lib/font-awesome
-RUN ln -s /usr/share/nodejs/bootstrap/dist /usr/share/prometheus/alertmanager/ui/lib/bootstrap4
+RUN ln -s /usr/share/nodejs/bootstrap/dist /usr/share/prometheus/alertmanager/ui/lib/bootstrap
 
 ENTRYPOINT ["/home/entrypoint.sh"]
 CMD ["-h"]
