@@ -133,7 +133,7 @@ if [ $arg1 == "stop" ]; then
      fi
      for p in /monicfg/$arg2.pid; do
        echo "Stopping $p"
-       kill -- -$(cat $p)
+       kill -sTERM -$(cat $p)
        rm $p
      done 
      exit 0
