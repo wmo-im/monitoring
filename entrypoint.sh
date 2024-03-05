@@ -65,16 +65,17 @@ if [ $arg1 == "start" ]; then
     prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml $@ &
     PR=$!
     echo $PR > /monicfg/$arg2.pid
+    MYPID="$MYPID $PR $GR"
     wait $(cat /monicfg/$arg2.pid)
     echo "Prometheus stopped: $?"
     exit 0
   fi
   if [ $arg2 == "moni_grafana" ]; then
+    export GRAFANA_HOME=/usr/share/grafana
     cd /usr/share/grafana || exit 1
-    echo "grafana-server $@"
-    grafana-server $@ &
+    echo "/usr/share/grafana/bin/grafana server $@"
+    /usr/share/grafana/bin/grafana server $@ &
     GR=$!
-    sleep 1
     echo $GR > /monicfg/$arg2.pid
     MYPID="$MYPID $PR $GR"
     echo ""
@@ -133,7 +134,7 @@ if [ $arg1 == "stop" ]; then
      fi
      for p in /monicfg/$arg2.pid; do
        echo "Stopping $p"
-       kill -sTERM -$(cat $p)
+       kill $(cat $p)
        rm $p
      done 
      exit 0
