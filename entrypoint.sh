@@ -119,6 +119,7 @@ if [ $arg1 == "install" ]; then
    ln -s /var/lib/grafana/plugins/ /monicfg/grafana/data/plugins
    mkdir /monicfg/moni
    cp /home/moni/keys.json /monicfg/moni/
+   touch /monicfg/prometheus/web.yml
    exit 0
 fi
 
