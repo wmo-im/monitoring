@@ -1,6 +1,7 @@
 #!/bin/sh
 arg1=$1
 arg2=$2
+arg3=$3
 
 if [ -z $arg2 ] || [ $arg1 == "-h" ]; then 
   echo "Monitoring Container"
@@ -64,10 +65,16 @@ if [ $arg1 == "start" ]; then
   for services in $(cat $arg2 | grep -v "#" | grep -v source= | grep -v tag= | grep -v config=); do
     echo "Starting $services"
     name=$(echo $services | cut -d, -f1)
+    if [ -z $arg3 ]; then
+      sn=$name
+    else
+      sn=$arg3
+    fi
+    
     id=$(echo $services | cut -d, -f2)
     port=$(echo $services | cut -d, -f3)
-    mounts=$(echo $services | cut -d, -f4)
-    args=$(echo $services | cut -d, -f5)
+    mounts=$(echo $services | cut -d, -f4 | sed -e 's/;/ /')
+    args=$(echo $services | cut -d, -f5 | sed -e 's/;/ /')
     if [ -z $name ] || [ -z $id ]; then
       echo "Invalid entry for $services"
       exit 1
@@ -85,13 +92,20 @@ if [ $arg1 == "start" ]; then
     if [ $name == "moni_black" ]; then PORT="-p $port:9115"; fi
     if [ $name == "moni_node" ]; then PORT="-p $port:9100"; fi
     if [ -z $port ]; then PORT=""; fi
-    echo "docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name $args"
-    docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name $args &
+    if [ $name == $sn ]; then
+      echo "docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name $args"
+      docker run -u $id --rm --name $name -d $PORT $MOUNT $tag start $name $args &
+    else
+      echo "$name != $arg3"
+    fi
   done
 fi
 
 if [ $arg1 == "stop" ]; then
-  for i in $(docker ps | grep moni.py | cut -d' ' -f1); do
+  if [ -z $arg3 ]; then
+    arg3="moni"
+  fi
+  for i in $(docker ps | grep moni.py | grep $arg3 | cut -d' ' -f1); do
     docker stop $i
   done
 fi

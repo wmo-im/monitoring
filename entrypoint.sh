@@ -42,10 +42,10 @@ if [ $arg1 == "start" ]; then
     echo "prometheus-alertmanager --config.file=/monicfg/prometheus/alertmanager.yml --web.config.file=/monicfg/prometheus/web.yml $@"
     prometheus-alertmanager --config.file=/monicfg/prometheus/alertmanager.yml --web.config.file=/monicfg/prometheus/web.yml $@ &
     EX=$!
-    echo $EX > /monicfg/alertmanager.pid
+    echo $EX > /monicfg/$arg2.pid
     MYPID="$MYPID $EX"
     echo ""
-    wait $(cat /monicfg/alertmanager.pid)
+    wait $(cat /monicfg/$arg2.pid)
     echo "Alertmanager stopped: $?"
     exit 0
   fi
@@ -53,10 +53,10 @@ if [ $arg1 == "start" ]; then
     echo "/home/exporter/exporter.py -f /monicfg/moni/keys.json"
     /home/exporter/exporter.py -f /monicfg/moni/keys.json &
     EX=$!
-    echo $EX > /monicfg/exporter.pid
+    echo $EX > /monicfg/$arg2.pid
     MYPID="$MYPID $EX"
     echo ""
-    wait $(cat /monicfg/exporter.pid)
+    wait $(cat /monicfg/$arg2.pid)
     echo "Exporter stopped: $?"
     exit 0
   fi
@@ -64,8 +64,8 @@ if [ $arg1 == "start" ]; then
     echo "prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml $@"
     prometheus --storage.tsdb.path=/monicfg/prometheus --config.file=/monicfg/prometheus/prometheus.yml $@ &
     PR=$!
-    echo $PR > /monicfg/prometheus.pid
-    wait $(cat /monicfg/prometheus.pid)
+    echo $PR > /monicfg/$arg2.pid
+    wait $(cat /monicfg/$arg2.pid)
     echo "Prometheus stopped: $?"
     exit 0
   fi
@@ -73,12 +73,12 @@ if [ $arg1 == "start" ]; then
     cd /usr/share/grafana || exit 1
     echo "grafana-server $@"
     grafana-server $@ &
+    GR=$!
     sleep 1
-    GR=$(pgrep grafana)
-    echo $GR > /monicfg/grafana.pid
+    echo $GR > /monicfg/$arg2.pid
     MYPID="$MYPID $PR $GR"
     echo ""
-    wait $(cat /monicfg/grafana.pid)
+    wait $(cat /monicfg/$arg2.pid)
     echo "Grafana stopped: $?"
     exit 0
   fi
@@ -86,10 +86,10 @@ if [ $arg1 == "start" ]; then
     echo "/home/moni/moni.py -f /monicfg/moni/keys.json"
     /home/moni/moni.py -f /monicfg/moni/keys.json &
     MN=$!
-    echo $MN > /monicfg/moni.pid
+    echo $MN > /monicfg/$arg2.pid
     MYPID="$MYPID $MN"
     echo ""
-    wait $(cat /monicfg/moni.pid)
+    wait $(cat /monicfg/$arg2.pid)
     echo "moni stopped: $?"
     exit 0
   fi
@@ -128,9 +128,12 @@ if [ $arg1 == "stop" ]; then
      echo "Please use docker stop to stop docker containers"
      exit 1
    else
-     for p in /monicfg/*.pid; do
+     if [ -z $arg2 ]; then
+       arg2="*"
+     fi
+     for p in /monicfg/$arg2.pid; do
        echo "Stopping $p"
-       kill $(cat $p)
+       kill -- -$(cat $p)
        rm $p
      done 
      exit 0
